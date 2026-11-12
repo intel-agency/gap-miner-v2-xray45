@@ -2,6 +2,14 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:complete on story #14 (PR #49 review → merged; next: #15)
+
+- Trigger: delivery 5c7ecae0. `validate` had FAILED on head 08a5a1d (markdownlint MD033: `NpgsqlParameter<T>` sat outside a code span in the implementation run's memory entry — CI lints `.agents/memory.md`) → fixed in ae89e4a before dispatching reviewers. Lesson: keep angle-bracket generics inside backticks in memory entries, always.
+- 3-reviewer round with disjoint scopes (A AC-conformance CLEAN 1 nit; B build/packaging CLEAN 0; C tests/SQL 1 minor + 1 nit): reviews 5878827723 / 5878889963 / 5878869510, ALL posted via GitKraken MCP — `gh api` was sandbox-blocked for all three this round (the MCP fallback is now the norm for reviewers; note it posts body-only reviews, no inline threads → dispositions go in ONE consolidated PR comment, the #48-round pattern).
+- All 3 findings fixed in f44eda8: NEW in-batch-duplicate test (same `(competitor_target_id, source_review_id)` pair twice inside ONE bulk call → returns 2, re-call 0 — proves `ON CONFLICT DO NOTHING` skips in-flight duplicates; the scraper-unstable-sort scenario C flagged), `.ThenBy(gap => gap.Id)` tiebreak on both `GetRankedAsync` branches (deterministic pagination across full ties), garbled mixed-batch comment rewritten. Validation re-run: build 0/0, gitleaks clean, Pester 266/266, dotnet test 94/94 (37 Domain + 57 Infrastructure), Infrastructure line coverage 95.09%.
+- Merge gate verified on head f44eda8 (5/5 checks pass — Analyze csharp needed a CodeQL wait; MERGEABLE/CLEAN; 0 unresolved threads of 0 total) → PR #49 squash-merged as c6d024f; story #14 auto-closed (CLOSED/COMPLETED via `Closes #14`); board #95: #14 → Done on close (verified via GraphQL).
+- Pipeline advanced: `implementation:ready` + orientation comment on #15 (Story 2.4: Redis Queue Abstraction — the LAST story of epic #11; when it merges, epic #11 gets `gh-issue-tracking:epic-implemented`). Orientation flagged: literal `BRPOP` against an `RPUSH`-fed list is LIFO (pops the tail just pushed) — poll `LPOP` for FIFO + blocking semantics; CPM pins already present (`StackExchange.Redis` 2.13.23, `Testcontainers.Redis` 4.16.0); R4 CancellationToken on queue methods; per-test queue keys for isolation on the shared Redis container.
+
 ### 2026-11-12 — rev2 pipeline run: implementation:ready on story #14 (Repository Layer implemented; PR opened)
 
 - Trigger: delivery 5be42370. Implemented Story 2.3 (T-1.3) on branch `mn/story-2-3-repository-layer`: 8 new files in `src/GapMiner.Infrastructure/Persistence/Repositories/` — `ICompetitorTargetRepository`/`IReviewRepository`/`IFeatureGapRepository` (+ EF-backed classes, primary-ctor style, no-tracking reads) with CancellationToken on every async method (default parameter), `FeatureGapSortBy` enum (Severity/Frequency — mirrors the API's `sortBy=severity|frequency` from T-3.5), and `AddGapMinerRepositories` scoped DI registration.
@@ -117,6 +125,7 @@
 
 ## Completed Work Items
 
+- 2026-11-12 — Story 2.3: Repository Layer (T-1.3) (#14): PR #49 squash-merged (c6d024f) after 3-reviewer round (0 major; 1 minor + 2 nits, all fixed in f44eda8; MD033 CI break fixed in ae89e4a). Pipeline advanced to Story 2.4 (#15) — last story of Epic 2 (#11).
 - 2026-11-12 — Story 2.2: EF Core DbContext & Migrations (T-1.2) (#13): PR #48 squash-merged (5afff90) after 3-reviewer round (11 findings, all minor/nit — 9 fixed, 2 plan-pin holds documented in 4183115). Pipeline advanced to Story 2.3 (#14).
 - 2026-11-12 — Story 2.1: Domain Entities (T-1.1) (#12): PR #47 squash-merged (0716e47) after 3-reviewer round (A/B clean, C 5 findings all fixed in 95ee28d). Pipeline advanced to Story 2.2 (#13).
 - 2026-11-12 — Epic 1: Environment & Foundation (Phase 0) (#4): CLOSED/COMPLETED. All 3 stories merged (PRs #44/#45/#46); integration validation green on merged HEAD (build 0/0, Pester 266/266, coverage 95.38%); progress report on plan #2; board #95 → Done. Pipeline advanced to Story 2.1 (#12).
