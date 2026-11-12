@@ -72,14 +72,17 @@ epics build them out). Connection strings flow to the services via `IConfigurati
 
 ## Running the tests
 
-The Pester test suite covers the `gh-issue-tracking-init` skill scripts:
+Two suites run in CI via [`validation.ps1`](validation.ps1) (build → scan → test):
 
 ```pwsh
-Invoke-Pester -Path .agents/skills/gh-issue-tracking-init/scripts/tests -Output Detailed
+./validation.ps1            # everything: markdownlint, build, gitleaks, Pester, dotnet test
+./validation.ps1 -Step test # Pester (skill scripts) + dotnet test (solution, coverage-gated)
 ```
 
-Expected result: 101 tests passing across three test files (`GhIssueTracking`,
-`SetProjectFields`, `AssertNoSecrets`).
+- **Pester** covers the repo's skill-script suites (`gh-issue-tracking-init`,
+  `update-powershell-standard`, `swarm`).
+- **xUnit** covers the .NET solution (`src/GapMiner.Domain` entities, value objects, enums);
+  line coverage is enforced above 85% by coverlet.
 
 ## Linting
 

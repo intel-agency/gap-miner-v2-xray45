@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Story 2.1 (T-1.1): pure domain model. Deliberately zero PackageReference
+       entries — GapMiner.Domain must stay free of EF Core / infrastructure
+       concerns; persistence mapping happens in GapMiner.Infrastructure (Story 2.2). -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+</Project>
