@@ -2,6 +2,14 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: epic-implemented on epic #4 (Epic 1 review → closed; next: #12)
+
+- Trigger: delivery f7b32c70. Ran the `gh-issue-tracking:epic-implemented` clause end-to-end in one session (no swarm — single-session dispatch). review-epic-prs ($epic = 4) hit its Step-0 no-open-PRs branch (`#review-epic-prs.no-prs`): PRs #44/#45/#46 all verified MERGED (7f82ef5 / 08088f8 / 363d049), zero open PRs in repo — each had already passed its 3-reviewer round at story level.
+- Epic integration validated on merged HEAD 4fe2963: `validation.ps1` ALL steps passed (build 0/0 with TreatWarningsAsErrors, gitleaks clean, Pester 266/266, coverage 95.38%) — this is the workflow's post-merge integration check; it doubles as the epic-level acceptance evidence.
+- Posted Epic 1 progress report on plan #2 (comment 6827345289: per-story PR/merge/review table, 3 ACs verified live, deferred risks), closed epic #4 (CLOSED/COMPLETED) — board #95 auto-moved #4 → Done on close (epics auto-move like stories; no manual item-edit needed). Pipeline advanced: `implementation:ready` on #12 (Story 2.1: Domain Entities (T-1.1), lowest-numbered open story, blocked_by satisfied) + orientation comment.
+- gh/GraphQL gotchas: `ProjectV2.items` takes NO `includeArchived` argument (unlike items under other nodes); fetch the project node id via `organization(login:).projectV2(number:95)` — guessing `PVT_…` ids NOT_FOUNDs. `gh issue list --state all --json` silently caps at one page (~30) on this repo (31+ issues) — closed-story counts read wrong from it; use sub-issues API or GraphQL for cross-repo-wide counts.
+- Memory line "likely #13 Story 2.1" from the previous run was off by one — #12 is Story 2.1 (live state won; re-confirmed via issue list). Next run: implement #12 per `implementation:ready`.
+
 ### 2026-11-12 — rev2 pipeline run: implementation:complete on story #10 (PR #46 review → merged; Epic 1 done)
 
 - Trigger: delivery 394b6370. Dispatched 3 subagent reviewers on PR #46 (head 6c753b6) with disjoint scopes (A: story/AC conformance, B: build/packaging/MSBuild, C: security + canonical fidelity). ALL THREE **CLEAN, 0 findings** — first fully-clean review round on this repo: A verified both ACs line-level + no scope creep; B verified CPM pins = the 8.2.2 template set, sln GUID wiring, launchSettings, worker SDK flips (build caveat below); C confirmed Extensions.cs verbatim vs microsoft/aspire v8.2.2 raw (118/118 lines), NU1902 rationale accurate per OSV (CVE-2026-42191, fixed 1.15.3, AV:L/AC:H/PR:L, `OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY` enabled nowhere → claim holds), secrets clean.
@@ -67,6 +75,7 @@
 
 ## Completed Work Items
 
+- 2026-11-12 — Epic 1: Environment & Foundation (Phase 0) (#4): CLOSED/COMPLETED. All 3 stories merged (PRs #44/#45/#46); integration validation green on merged HEAD (build 0/0, Pester 266/266, coverage 95.38%); progress report on plan #2; board #95 → Done. Pipeline advanced to Story 2.1 (#12).
 - 2026-11-12 — Story 1.3: ServiceDefaults Project (T-0.3) (#10): PR #46 squash-merged (363d049) after a fully-clean 3-reviewer round (0 findings). Epic 1 (#4) complete — all 3 stories merged; `gh-issue-tracking:epic-implemented` applied.
 - 2026-11-12 — Story 1.2: Aspire AppHost Skeleton (T-0.2) (#8): PR #45 squash-merged (08088f8) after 3-reviewer round + 1 finding fixed (workload pin via fail-on-drift assertion). Epic 1 continues with its last story, 1.3 (#10).
 - 2026-11-12 — Story 1.1: Repository Bootstrap (T-0.1) (#6): PR #44 squash-merged (7f82ef5) after 3-reviewer round + 1 finding fixed (EnforceCodeStyleInBuild). Epic 1 continues with Story 1.2 (#8).
