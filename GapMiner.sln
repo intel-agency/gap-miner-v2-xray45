@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.ScraperWorker", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.AIWorker", "src\GapMiner.AIWorker\GapMiner.AIWorker.csproj", "{D396DBFB-A583-46BE-9371-1F904C936C39}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.ServiceDefaults", "src\GapMiner.ServiceDefaults\GapMiner.ServiceDefaults.csproj", "{8F6C1A42-60D9-4D3D-A125-68813A224C71}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,7 @@ Global
 		{6B847A3D-3363-4949-8FD0-F523CD3B000B} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
 		{D404C4E1-B3A5-4D1E-8C39-6D7F885A700C} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
 		{D396DBFB-A583-46BE-9371-1F904C936C39} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
+		{8F6C1A42-60D9-4D3D-A125-68813A224C71} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{9B0FA320-8074-47EE-B030-6C848D14C829}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -52,5 +55,9 @@ Global
 		{D396DBFB-A583-46BE-9371-1F904C936C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D396DBFB-A583-46BE-9371-1F904C936C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D396DBFB-A583-46BE-9371-1F904C936C39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F6C1A42-60D9-4D3D-A125-68813A224C71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F6C1A42-60D9-4D3D-A125-68813A224C71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F6C1A42-60D9-4D3D-A125-68813A224C71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F6C1A42-60D9-4D3D-A125-68813A224C71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
