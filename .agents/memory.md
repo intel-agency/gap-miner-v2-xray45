@@ -2,6 +2,13 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:complete on story #12 (PR #47 review → merged; next: #13)
+
+- Trigger: delivery c2203d70. 3-reviewer round on PR #47 (head 56f3e6b): A (AC conformance) CLEAN — all 7 ACs line-level, `FeatureGap.SeverityScore` VO-typing adjudicated as satisfying combined AC intent (bare double would leave the mandated VO consumerless; EF converter = Story 2.2); B (build/packaging/gate) CLEAN — CPM pins Microsoft.NET.Test.Sdk 18.12.0 + coverlet.msbuild 10.1.0 verified latest-stable via nuget.org flat-container, versionless PackageReference only, sln GUID wiring, validation.ps1 mirrors CI by construction, local build 0/0 + 36/36 + cobertura line-rate 1.0; C (tests/security) 5 findings (3 minor, 2 nits, all test/doc level — zero source defects).
+- All 5 fixed in 95ee28d: ImmutabilityTests `GetSetMethod(nonPublic: true)` (nonPublic:false conflates get-only with private setters — a `{ get; private set; }` refactor would pass silently) + entity TheoryData derived from the Domain assembly (hand-maintained list silently escapes future entities); `[InlineData(double.NegativeInfinity)]`; Embdding→Embedding typo; README stale "101 tests/three files" dropped. Validation green (37/37, coverage ≥85%), threads replied+resolved via GraphQL → 0 unresolved.
+- Merge gate verified on head 95ee28d (checks GREEN, MERGEABLE/CLEAN, 0 unresolved threads) → PR #47 squash-merged as 0716e47; story #12 auto-closed (CLOSED/COMPLETED); board #95: #12 → Done on close. Pipeline advanced: `implementation:ready` + orientation comment on #13 (Story 2.2, blocker #12 closed); board #13 → In Progress.
+- gh/GraphQL gotchas new this run: `reviewThreads` connection has NO `filteredCount` field — count unresolved via `nodes{isResolved}`; `ProjectV2Field` has no `options` — inline on `ProjectV2SingleSelectField` to read option ids; `gh project item-edit` printed help and silently no-op'd — direct `updateProjectV2ItemFieldValue` mutation (project PVT_kwDOVryTG84BrS-T, field PVTSSF_…, singleSelectOptionId) worked. All three reviewers posted their own COMMENT reviews via `gh api` this round (no sandbox blocks, unlike PR #45/#46 rounds).
+
 ### 2026-11-12 — rev2 pipeline run: implementation:ready on story #12 (Domain Entities implemented; PR opened)
 
 - Trigger: delivery dce9c330. Implemented Story 2.1 (T-1.1) on branch `mn/story-2-1-domain-entities`: `src/GapMiner.Domain` (pure, zero PackageReference entries) — `CompetitorTarget`/`Review`/`FeatureGap` sealed entities with validating ctors + init-only props, `SeverityScore` readonly record struct with private ctor + `Create(double)` factory enforcing inclusive [1.0, 10.0] (explicit NaN/infinity guard — NaN passes `<`/`>` range checks, `ThrowIfLessThan` alone would accept it), `MarketplaceKind` enum (ShopifyAppStore/ChromeWebStore/AppleAppStore/G2).
@@ -84,6 +91,7 @@
 
 ## Completed Work Items
 
+- 2026-11-12 — Story 2.1: Domain Entities (T-1.1) (#12): PR #47 squash-merged (0716e47) after 3-reviewer round (A/B clean, C 5 findings all fixed in 95ee28d). Pipeline advanced to Story 2.2 (#13).
 - 2026-11-12 — Epic 1: Environment & Foundation (Phase 0) (#4): CLOSED/COMPLETED. All 3 stories merged (PRs #44/#45/#46); integration validation green on merged HEAD (build 0/0, Pester 266/266, coverage 95.38%); progress report on plan #2; board #95 → Done. Pipeline advanced to Story 2.1 (#12).
 - 2026-11-12 — Story 1.3: ServiceDefaults Project (T-0.3) (#10): PR #46 squash-merged (363d049) after a fully-clean 3-reviewer round (0 findings). Epic 1 (#4) complete — all 3 stories merged; `gh-issue-tracking:epic-implemented` applied.
 - 2026-11-12 — Story 1.2: Aspire AppHost Skeleton (T-0.2) (#8): PR #45 squash-merged (08088f8) after 3-reviewer round + 1 finding fixed (workload pin via fail-on-drift assertion). Epic 1 continues with its last story, 1.3 (#10).
