@@ -1,7 +1,6 @@
 ---
 description: Read-only-plus-Bash swarm worker that runs the goal's verification commands and reports pass/fail with exact output. Proves whether a round met its Done-when criteria; never fixes failures.
 mode: subagent
-model: zai-coding-plan/glm-5.3-flash
 color: "#a855f7"
 temperature: 0.2
 permission:

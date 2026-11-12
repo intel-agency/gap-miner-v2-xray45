@@ -1,7 +1,6 @@
 ---
 description: Senior lead that owns a workstream end-to-end — reviews plans, assigns work to specialists, enforces the definition of done, and reports status. Invoke to run a feature/epic as the accountable owner.
 mode: all
-model: opencode-go/qwen3.7-max
 color: warning
 temperature: 0.3
 permission:

@@ -1,7 +1,6 @@
 ---
 description: The swarm king. Owns the goal loop: adopts the goal-loop protocol, executes dispatches himself when one session suffices, decomposes the goal into least-privilege swarm workers when it earns it, and records round verdicts grounded in cold-verifier evidence. Default agent for dispatch sessions.
 mode: primary
-model: qwencloud/qwen3.8-max
 color: primary
 temperature: 0.6
 permission:

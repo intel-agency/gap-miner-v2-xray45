@@ -1,7 +1,6 @@
 ---
 description: Read-only swarm worker that reviews a diff or file set for correctness, security, and quality, reporting severity-ranked findings. Never fixes what it finds.
 mode: subagent
-model: zai-coding-plan/glm-5.3-flash
 color: warning
 temperature: 0.2
 permission:

@@ -1,7 +1,6 @@
 ---
 description: Read-only swarm worker for codebase investigation and web/documentation research. Returns findings with exact paths, symbols, and source URLs. Cannot modify files.
 mode: subagent
-model: zai-coding-plan/glm-5.3-flash
 color: accent
 temperature: 0.2
 permission:

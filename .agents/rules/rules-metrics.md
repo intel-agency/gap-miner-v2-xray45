@@ -28,7 +28,7 @@ Each rule file ends with `<!-- canary: <colour>-<animal>-<number> -->`. The toke
 body and **nowhere in the AGENTS.md preview**, so a recited token is only explicable by a read.
 Tokens are assigned in `~/.qwen/metrics/canary-registry.json` (outside every repo tree on purpose) and
 are stable across the lineage — the same subject keeps the same token in `agent-context`,
-`swarm-context`, and this repo, so clones stay comparable.
+`gap-miner-v2-xray45`, and this repo, so clones stay comparable.
 
 Two **negative controls** must never appear in agent output:
 `.agents/rules/.unreferenced-canary.md` and
@@ -136,7 +136,7 @@ The point of a day of data is to decide whether prose disclosure suffices:
 ## Baseline at install (2026-09-27)
 
 Every rule file in both repos got a canary — 20 real rule files in
-`swarm-orchestration-service` (18 real in `swarm-context`), plus the two decoys per
+`swarm-orchestration-service` (18 real in `gap-miner-v2-xray45`), plus the two decoys per
 repo: 22 tracked `.md` files in total in `swarm-orchestration-service`, 20 here. Verified state at install: zero token duplicates, zero
 tokens present in
 any `AGENTS.md` preview, zero dead TOC links, zero bare name-only bullets, `markdownlint-cli2` clean.
@@ -145,7 +145,7 @@ untouched — that is the pre-measurement floor, not a failure. First real probe
 a headless session recited `tools.md`'s token correctly **with** a logged `read_file`, and the audit
 flagged one earlier session as `UNSUPPORTED` — which turned out to be a handler bug (relative paths
 weren't matched), now fixed. Resident cost of the five new TOC previews: **+619 tokens**
-(`swarm-context`) and **+700** (this repo) per request — the honest price of making the outline
+(`gap-miner-v2-xray45`) and **+700** (this repo) per request — the honest price of making the outline
 actionable.
 
 <!-- canary: silver-moth-22 -->

@@ -1,7 +1,6 @@
 ---
 description: Post-wave swarm telemetry analyst: parses subagent session logs, records per-agent metrics into docs/swarm-metrics.md, and reports anomalies (wasted tool calls, thinking leakage, retry loops, contention) for the orchestrator to act on. Read-only plus Bash; writes only the metrics doc.
 mode: subagent
-model: zai-coding-plan/glm-5.3-flash
 color: info
 temperature: 0.2
 permission:

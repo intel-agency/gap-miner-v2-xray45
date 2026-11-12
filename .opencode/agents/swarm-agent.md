@@ -1,7 +1,6 @@
 ---
 description: Generic least-privilege swarm worker: read-only analysis, search, and reporting for one delegated task. Extend this definition (copy it, add only the tools the task needs) when a task requires writing, running commands, or web access.
 mode: subagent
-model: zai-coding-plan/glm-5.3-flash
 color: warning
 temperature: 0.2
 permission:

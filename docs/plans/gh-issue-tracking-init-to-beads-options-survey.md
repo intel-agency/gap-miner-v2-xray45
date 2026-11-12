@@ -5,7 +5,7 @@ Date: 2026-11-04
 Parent plan: [`gh-issue-tracking-init-to-beads.md`](./gh-issue-tracking-init-to-beads.md)
 Skill under change: `.agents/skills/gh-issue-tracking-init/`
 Evidence base: first-hand `bd` experiments (scratch Dolt DBs under
-`/tmp/kilo/swarm-context/bd-scratch*` = v1.0.4 and `bd-scratch134/` = v1.3.4, both
+`/tmp/kilo/gap-miner-v2-xray45/bd-scratch*` = v1.0.4 and `bd-scratch134/` = v1.3.4, both
 2026-11-04) + beads source/docs research at tag `v1.3.4` and `main` (citations
 inline). The installed binary was upgraded 1.0.4 → **1.3.4** (latest release,
 published 2026-11-04) after the first draft; every load-bearing fact was
@@ -455,7 +455,7 @@ Findings and their resolutions:
 7. **Post-upgrade re-verification (bd 1.0.4 → 1.3.4, same day)** — the installed
    binary was upgraded to v1.3.4 (latest release, published 2026-11-04) and every
    load-bearing fact was re-tested live in a fresh scratch DB
-   (`/tmp/kilo/swarm-context/bd-scratch134/`):
+   (`/tmp/kilo/gap-miner-v2-xray45/bd-scratch134/`):
    - **Still true on 1.3.4** (recommendations unchanged): unknown-`_type`
      garbage-import (G5 — the sidecar stays mandatory), `--graph` non-idempotency
      (G8), upsert-by-id (G4), export/edge schema incl. `parent-child` (G1–G3),

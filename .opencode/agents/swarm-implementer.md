@@ -1,7 +1,6 @@
 ---
 description: Swarm worker that edits files and runs build/test commands for one delegated implementation task with explicit Done-when criteria. Use for any task that must change the working tree.
 mode: subagent
-model: zai-coding-plan/glm-5.3-flash
 color: success
 temperature: 0.2
 permission:

@@ -2,7 +2,7 @@
 
 ## Repository identity
 
-This repository — **`nam20485/swarm-context`** — is the **parent template**: a fork-style descendant of the `intel-agency/agent-context` template (its `upstream`, push-disabled; base content flows one-way via reviewed PRs) extended with the swarm surfaces (`.zcode/agents` worker definitions, `.agents/rules/swarm.md` + `swarm-workers.md`, the `$swarm` and `swarm-plan` skills). Clones for the swarm-orchestration workflow are minted from it (GitHub template route) by the launcher in `nam20485/swarm-orchestration-service`, so when the user refers to "the parent template", "the swarm seed", or "a swarm-context clone", treat it as a repo stamped from this one.
+This repository — **`intel-agency/gap-miner-v2-xray45`** — is the **project instance** stamped from the `nam20485/swarm-context` parent template: it carries the agent-context base plus the swarm surfaces (`.zcode/agents` worker definitions, `.agents/rules/swarm.md` + `swarm-workers.md`, the `$swarm` and `swarm-plan` skills) and houses this app's plan (`plan_docs/`) and its development. When the user refers to "the parent template", "the swarm seed", or "a swarm-context clone", treat it as the template this repo was stamped from.
 
 ## Memory and Rules
 

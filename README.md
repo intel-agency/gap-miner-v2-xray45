@@ -1,12 +1,10 @@
-# swarm-context
+# gap-miner-v2-xray45
 
-This repository is the **parent template** in the repo chain: a fork-style descendant of
-[`intel-agency/agent-context`](https://github.com/intel-agency/agent-context) extended with
-the swarm surfaces — `.zcode/agents` worker definitions, `.agents/rules/swarm.md` +
-`swarm-workers.md`, and the `$swarm` / `swarm-plan` skills. Clones for the
-swarm-orchestration workflow are minted from it (GitHub template route) by the launcher in
-`nam20485/swarm-orchestration-service` (`create-repo-agent-context.ps1`); upstream base
-content flows one-way from `agent-context` via reviewed PRs.
+This repository is a **project instance** stamped from the `nam20485/swarm-context` parent
+template (GitHub template route) by the launcher in `nam20485/swarm-orchestration-service`:
+it carries the agent-context base plus the swarm surfaces — `.zcode/agents` worker
+definitions, `.agents/rules/swarm.md` + `swarm-workers.md`, the `$swarm` / `swarm-plan`
+skills — and houses this app's plan (`plan_docs/`) and its development.
 
 ## Prerequisites
 
