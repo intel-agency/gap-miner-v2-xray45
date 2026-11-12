@@ -1,0 +1,9 @@
+<Project>
+  <!-- Shared MSBuild properties applied to every project under the repo root.
+       Warnings are fatal; nullable reference types and implicit usings are on. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
