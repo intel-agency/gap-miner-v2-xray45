@@ -2,6 +2,15 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:ready on story #12 (Domain Entities implemented; PR opened)
+
+- Trigger: delivery dce9c330. Implemented Story 2.1 (T-1.1) on branch `mn/story-2-1-domain-entities`: `src/GapMiner.Domain` (pure, zero PackageReference entries) — `CompetitorTarget`/`Review`/`FeatureGap` sealed entities with validating ctors + init-only props, `SeverityScore` readonly record struct with private ctor + `Create(double)` factory enforcing inclusive [1.0, 10.0] (explicit NaN/infinity guard — NaN passes `<`/`>` range checks, `ThrowIfLessThan` alone would accept it), `MarketplaceKind` enum (ShopifyAppStore/ChromeWebStore/AppleAppStore/G2).
+- Design decision (AC wording): FeatureGap.SeverityScore is typed as the `SeverityScore` VALUE OBJECT (wrapping the double), not a bare `double` — the factory range enforcement then covers entity construction; a plain-double property would leave the VO decorative. EF value-converter mapping is Story 2.2's concern.
+- First C# test project `tests/GapMiner.Domain.Tests` (xUnit): 36 tests incl. boundary theories (1.0/10.0 accepted, 0.99/10.01/NaN/∞ rejected; StarRating 1–5; MentionFrequency ≥ 0; empty/null ReviewText) + a reflection test proving every entity property is get/init-only (IsExternalInit modreq on setter). Domain coverage 100% line/branch/method.
+- Gate extension (mirrors CI): `validation.ps1` Step-Test now also runs `dotnet test GapMiner.sln` with coverlet.msbuild `/p:Threshold=85 /p:ThresholdType=line /p:ThresholdStat=total` and merges cobertura into the HTML report. CPM additions (latest stable, nuget.org verified): Microsoft.NET.Test.Sdk 18.12.0, coverlet.msbuild 10.1.0. `coverage.cobertura.xml` gitignored.
+- Gotcha: under CPM, PackageReference Version attributes in the csproj are error NU1008 (TreatWarningsAsErrors makes it fail the build) — versions go ONLY in Directory.Packages.props. `.editorconfig` CRLF: new .cs/.csproj files written then `sed -i 's/\r$//; s/$/\r/'` to normalize.
+- Validation: build 0 errors/0 warnings, gitleaks clean, Pester 266/266 (95.38% script coverage), dotnet test 36/36, all steps green.
+
 ### 2026-11-12 — rev2 pipeline run: epic-implemented on epic #4 (Epic 1 review → closed; next: #12)
 
 - Trigger: delivery f7b32c70. Ran the `gh-issue-tracking:epic-implemented` clause end-to-end in one session (no swarm — single-session dispatch). review-epic-prs ($epic = 4) hit its Step-0 no-open-PRs branch (`#review-epic-prs.no-prs`): PRs #44/#45/#46 all verified MERGED (7f82ef5 / 08088f8 / 363d049), zero open PRs in repo — each had already passed its 3-reviewer round at story level.
