@@ -24,6 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Story 2.4 (T-1.4): Redis-backed job queue client (CPM-pinned 2.13.23,
+         plan §3 "Queue / Cache"). -->
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GapMiner.Domain\GapMiner.Domain.csproj" />
   </ItemGroup>
 
