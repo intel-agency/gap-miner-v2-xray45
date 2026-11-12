@@ -32,6 +32,7 @@ out/
 coverage/
 coverage.xml
 coverage-html/
+coverage.cobertura.xml
 
 # IDE / editor
 .idea/

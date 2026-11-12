@@ -182,6 +182,16 @@ function Step-Test {
 
     Write-Host "Pester: $($result.PassedCount)/$($result.TotalCount) tests passed" -ForegroundColor Green
 
+    # .NET unit tests (xUnit) for the GapMiner solution. coverlet.msbuild collects
+    # line coverage and enforces the same threshold as the Pester gate; the cobertura
+    # file is merged into the HTML coverage report below.
+    Write-Host "Running dotnet tests (GapMiner.sln)..." -ForegroundColor Gray
+    $slnPath = Join-Path $repoRoot 'GapMiner.sln'
+    & dotnet test $slnPath /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura "/p:Threshold=$CoverageThreshold" /p:ThresholdType=line /p:ThresholdStat=total
+    if ($LASTEXITCODE -ne 0) { throw "dotnet test failed with exit code $LASTEXITCODE" }
+
+    Write-Host "dotnet test: passed (threshold $CoverageThreshold% line coverage enforced by coverlet)" -ForegroundColor Green
+
     $coveragePercent = [math]::Round($result.CodeCoverage.CoveragePercent, 2)
     $executed = $result.CodeCoverage.CommandsExecutedCount
     $analyzed = $result.CodeCoverage.CommandsAnalyzedCount
@@ -203,7 +213,12 @@ function Step-Test {
         }
 
         $htmlDir = Join-Path $repoRoot 'coverage-html'
-        & reportgenerator "-reports:$coverageFile" "-targetdir:$htmlDir" "-reporttypes:Html"
+        $reports = @(Join-Path $repoRoot 'coverage.xml')
+        $coberturaFiles = @(Get-ChildItem (Join-Path $repoRoot 'src'), (Join-Path $repoRoot 'tests') -Recurse -Filter 'coverage.cobertura.xml' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
+        if ($coberturaFiles.Count -gt 0) {
+            $reports += $coberturaFiles
+        }
+        & reportgenerator "-reports:$($reports -join ';')" "-targetdir:$htmlDir" "-reporttypes:Html"
         if ($LASTEXITCODE -ne 0) { throw "ReportGenerator failed with exit code $LASTEXITCODE" }
         Write-Host "HTML coverage report generated at coverage-html/" -ForegroundColor Green
     }
