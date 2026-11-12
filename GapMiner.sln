@@ -22,6 +22,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.Domain", "src\GapM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.Domain.Tests", "tests\GapMiner.Domain.Tests\GapMiner.Domain.Tests.csproj", "{01BF553B-4BDC-433A-9F38-A28E2966C2BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.Infrastructure", "src\GapMiner.Infrastructure\GapMiner.Infrastructure.csproj", "{07708C15-BB5F-4A93-BA33-E98C635890CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.Infrastructure.Tests", "tests\GapMiner.Infrastructure.Tests\GapMiner.Infrastructure.Tests.csproj", "{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,8 @@ Global
 		{8F6C1A42-60D9-4D3D-A125-68813A224C71} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
 		{EB3BBA09-A708-483E-9160-959A0F54E37B} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
 		{01BF553B-4BDC-433A-9F38-A28E2966C2BD} = {B37D0A54-2712-420C-9359-2A496109A0DF}
+		{07708C15-BB5F-4A93-BA33-E98C635890CD} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
+		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E} = {B37D0A54-2712-420C-9359-2A496109A0DF}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{9B0FA320-8074-47EE-B030-6C848D14C829}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -73,5 +79,13 @@ Global
 		{01BF553B-4BDC-433A-9F38-A28E2966C2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01BF553B-4BDC-433A-9F38-A28E2966C2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01BF553B-4BDC-433A-9F38-A28E2966C2BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07708C15-BB5F-4A93-BA33-E98C635890CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07708C15-BB5F-4A93-BA33-E98C635890CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07708C15-BB5F-4A93-BA33-E98C635890CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07708C15-BB5F-4A93-BA33-E98C635890CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

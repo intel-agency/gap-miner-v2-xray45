@@ -2,7 +2,9 @@
 
   <!-- Placeholder for Story 5.1 (T-4.1) Minimal API endpoints; wired into the AppHost
        by Story 1.2 so connection strings flow through IConfiguration. Story 1.3 adds
-       the ServiceDefaults reference: OTel tracing/logging + /health and /alive. -->
+       the ServiceDefaults reference: OTel tracing/logging + /health and /alive.
+       Story 2.2 adds the Infrastructure reference so the GapMinerDbContext can be
+       registered and migrated at dev startup. -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GapMiner.Infrastructure\GapMiner.Infrastructure.csproj" />
     <ProjectReference Include="..\GapMiner.ServiceDefaults\GapMiner.ServiceDefaults.csproj" />
   </ItemGroup>
 

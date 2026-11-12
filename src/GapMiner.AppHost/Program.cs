@@ -10,9 +10,20 @@
 // Services: the four projects are placeholders wired with WithReference so connection
 // strings flow through IConfiguration in downstream projects; later epics build them out.
 
+// Story 2.2: the postgres password is pinned to a stable local-dev default. With
+// WithDataVolume(), Aspire's default random-per-run password only matches the cluster
+// on the very first run — every later run would fail auth (28P01) and the Api's
+// dev-only ApplyMigrationsAsync at startup would crash the service. Aspire 8.2's
+// AddParameter has no inline default (config-only), so the ParameterResource is
+// constructed directly — its value factory returns the literal and never reads
+// Parameters: configuration. Rotate the local-dev default by changing the literal;
+// a real deployment should switch to AddParameter (config-driven) instead.
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres")
+var postgresPassword = builder.CreateResourceBuilder(
+    new ParameterResource("postgres-password", _ => "gapminer-local-dev", secret: true));
+
+var postgres = builder.AddPostgres("postgres", password: postgresPassword)
                       .WithImage("pgvector/pgvector")
                       .WithImageTag("pg16")
                       .WithDataVolume()

@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Story 2.2 (T-1.2): integration tests for the EF Core persistence layer.
+       MigrationRoundTripTests / ApplyMigrationsTests run Testcontainers
+       (pgvector/pgvector:pg16 — the same image the AppHost uses), so a Docker
+       daemon is required. EF-generated design-time artifacts (the model snapshot
+       and *.Designer.cs) are excluded from the coverlet floor: they contain no
+       runtime code paths. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <!-- Coverage scope = the assembly under test. GapMiner.Domain is measured here at
+         0% because this suite exercises persistence, not domain logic; its coverage
+         floor is enforced by GapMiner.Domain.Tests. EF design-time artifacts (model
+         snapshot + *.Designer.cs) contain no runtime code paths either. -->
+    <Exclude>$(Exclude)[GapMiner.Domain]*</Exclude>
+    <ExcludeByFile>$(ExcludeByFile)**/Persistence/Migrations/*ModelSnapshot.cs,**/Persistence/Migrations/*.Designer.cs</ExcludeByFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.msbuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\GapMiner.Infrastructure\GapMiner.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

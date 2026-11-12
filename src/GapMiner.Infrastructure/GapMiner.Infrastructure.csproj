@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Story 2.2 (T-1.2): EF Core persistence for the GapMiner domain model.
+       Versions are pinned centrally in Directory.Packages.props (plan §3):
+       Npgsql.EntityFrameworkCore.PostgreSQL 8.0.10 + Pgvector.EntityFrameworkCore 0.2.0
+       on EF Core 8.0.x. Design is a private design-time dependency used by the
+       repo-local dotnet-ef tool (.config/dotnet-tools.json) to generate migrations. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Direct EF references (CPM-pinned 8.0.34) so the exact EF versions flow to
+         consumers; Npgsql 8.0.10's transitive pins alone would leave them on 8.0.10
+         while Design (PrivateAssets) compiles this assembly against 8.0.34. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Pgvector.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GapMiner.Domain\GapMiner.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
