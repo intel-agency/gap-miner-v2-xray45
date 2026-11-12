@@ -92,8 +92,8 @@ public sealed class ReviewRepositoryTests(PostgresFixture fixture)
         };
         var secondBatch = new[]
         {
-            // One duplicate of the first batch, two genuinely new rows. The batch is
-            // still fully in-database terms after this call: 1 + 2 = 3 rows total.
+            // One duplicate of the first batch, two genuinely new rows: only the
+            // two new rows insert, leaving 1 + 2 = 3 rows total for this target.
             NewReview(target.Id, sourceReviewId: "kept-2"),
             NewReview(target.Id, sourceReviewId: "fresh-1"),
             NewReview(target.Id, sourceReviewId: "fresh-2"),
@@ -108,6 +108,35 @@ public sealed class ReviewRepositoryTests(PostgresFixture fixture)
         var stored = await repository.GetByTargetIdAsync(target.Id);
         Assert.Equal(
             new[] { "fresh-1", "fresh-2", "kept-1", "kept-2" },
+            stored.Select(review => review.SourceReviewId).OrderBy(id => id));
+    }
+
+    [Fact]
+    public async Task BulkInsertIgnoreDuplicatesAsync_with_duplicates_inside_one_batch_inserts_each_row_once()
+    {
+        var target = await AddTargetAsync("In-batch duplicate probe");
+
+        // A scraper paginating an unstable marketplace sort can re-emit the same
+        // review within one run: the same (competitor_target_id, source_review_id)
+        // pair twice inside ONE statement. ON CONFLICT DO NOTHING must skip the
+        // in-flight duplicate too — returning 2 (the unique rows), never throwing
+        // a unique violation.
+        var batch = new[]
+        {
+            NewReview(target.Id, sourceReviewId: "in-batch-dup"),
+            NewReview(target.Id, sourceReviewId: "in-batch-dup"),
+            NewReview(target.Id, sourceReviewId: "in-batch-unique"),
+        };
+
+        await using var context = await NewContextAsync();
+        var repository = new ReviewRepository(context);
+
+        Assert.Equal(2, await repository.BulkInsertIgnoreDuplicatesAsync(batch));
+        Assert.Equal(0, await repository.BulkInsertIgnoreDuplicatesAsync(batch));
+
+        var stored = await repository.GetByTargetIdAsync(target.Id);
+        Assert.Equal(
+            new[] { "in-batch-dup", "in-batch-unique" },
             stored.Select(review => review.SourceReviewId).OrderBy(id => id));
     }
 

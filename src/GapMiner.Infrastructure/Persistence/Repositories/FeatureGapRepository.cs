@@ -33,11 +33,13 @@ public sealed class FeatureGapRepository(GapMinerDbContext context) : IFeatureGa
             FeatureGapSortBy.Severity => context.FeatureGaps
                 .AsNoTracking()
                 .OrderByDescending(gap => gap.SeverityScore)
-                .ThenByDescending(gap => gap.MentionFrequency),
+                .ThenByDescending(gap => gap.MentionFrequency)
+                .ThenBy(gap => gap.Id),
             FeatureGapSortBy.Frequency => context.FeatureGaps
                 .AsNoTracking()
                 .OrderByDescending(gap => gap.MentionFrequency)
-                .ThenByDescending(gap => gap.SeverityScore),
+                .ThenByDescending(gap => gap.SeverityScore)
+                .ThenBy(gap => gap.Id),
             _ => throw new ArgumentOutOfRangeException(nameof(sortBy), sortBy, "Unknown feature-gap ranking."),
         };
 
