@@ -24,6 +24,11 @@ jobs:
             8.0.x
             10.0.x
 
+      # The aspire workload supplies the DCP/dashboard binaries and the Projects
+      # source generator required by GapMiner.AppHost (IsAspireHost / NETSDK1147).
+      - name: Install aspire workload
+        run: dotnet workload install aspire
+
       - name: Install markdownlint-cli2
         run: npm install -g markdownlint-cli2@0.22.1
 

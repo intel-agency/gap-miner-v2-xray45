@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Orchestration: .NET Aspire 8.2.x -->
+    <!-- Orchestration: .NET Aspire 8.2.x (AppHost meta-package required by the aspire
+         workload SDK targets; pulls Aspire.Hosting transitively at the same version). -->
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="8.2.2" />
     <PackageVersion Include="Aspire.Hosting" Version="8.2.2" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="8.2.2" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="8.2.2" />

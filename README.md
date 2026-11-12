@@ -45,6 +45,31 @@ environment / `auth.json` at runtime.
 | `local_ai_instruction_modules/` | Workflow assignment and dynamic workflow lookup tables |
 | `.opencode/` | OpenCode agent definitions and runtime configuration |
 
+## Running the app (Aspire AppHost)
+
+Prerequisites: .NET 8 SDK, the `aspire` workload, and a Docker daemon:
+
+```sh
+dotnet workload install aspire   # once per machine: DCP/dashboard binaries + Projects generator
+dotnet run --project src/GapMiner.AppHost
+```
+
+This launches the Aspire dashboard on <https://localhost:18888> (login link printed to
+the console) with PostgreSQL 16 (`pgvector/pgvector:pg16`, persistent data volume,
+`gapminer` database connection string) and Redis 7.4 as container resources, plus the
+four service projects (Api, Web, ScraperWorker, AIWorker — placeholders until their
+epics build them out). Connection strings flow to the services via `IConfiguration`
+(`ConnectionStrings:gapminer`, `ConnectionStrings:redis`).
+
+> **Note (OpenSSL ≥ 3.5 distros, e.g. Debian 13):** the DCP binary shipped with
+> Aspire 8.2.2 panics during its TLS 1.3 handshake against newer OpenSSL patches
+> (see [golang-fips/go#344](https://github.com/golang-fips/go/issues/344),
+> [microsoft/aspire#17421](https://github.com/microsoft/aspire/issues/17421)) and the
+> AppHost fails with `SSL connection could not be established` / SSL EOF. Workaround:
+> preload an era-matched libcrypto/libssl (OpenSSL 3.0.14 works), e.g.
+> `LD_PRELOAD=/path/to/libcrypto.so.3:/path/to/libssl.so.3 dotnet run --project src/GapMiner.AppHost`.
+> Fixed upstream in newer Aspire versions (≥ 13.3.1).
+
 ## Running the tests
 
 The Pester test suite covers the `gh-issue-tracking-init` skill scripts:
