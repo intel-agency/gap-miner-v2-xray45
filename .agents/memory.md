@@ -2,6 +2,13 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:ready on story #6 (Repository Bootstrap)
+
+- Trigger: delivery 5cd35350 (label implementation:ready on story #6). Implemented Story 1.1 (T-0.1) on branch `mn/story-1-1-repository-bootstrap`: global.json (8.0.404 + rollForward latestFeature), Directory.Packages.props (CPM, 18 pinned PackageVersion entries covering every plan §3 row that maps to NuGet), Directory.Build.props (TreatWarningsAsErrors/Nullable/ImplicitUsings), .editorconfig (file-scoped namespaces warning, 4-space, CRLF, md/sln exceptions), GapMiner.sln with src+tests solution folders; `dotnet build GapMiner.sln` exit 0.
+- Gotcha: `dotnet sln add-folder` does NOT exist in .NET 8 SDK (added in the later `dotnet sln` rewrite) — solution folders were hand-authored in the .sln via the solution-folder project type GUID {2150E333-8FDC-42A3-9474-1A3956D46DE8} + empty NestedProjects section.
+- Environment: this machine had only SDK 10.0.403 in /usr/share/dotnet; installed 8.0.426 to ~/.dotnet via dotnet-install.sh (export DOTNET_ROOT=$HOME/.dotnet PATH=$HOME/.dotnet:$PATH) because global.json pinning 8.0.x + latestFeature does not roll forward across majors.
+- Validation-mirror sync: validation.ps1 Step-Build now builds GapMiner.sln; ci.yml setup-dotnet installs 8.0.x + 10.0.x (stale "no .NET product code" comment fixed). /safe-commit skill is absent from this clone — its substance (gitleaks secret scan) runs via `validation.ps1 -Step scan`, executed before every commit of this run.
+
 ### 2026-11-12 — rev2 pipeline run: init-success → implementation:ready on story #6
 
 - Trigger: delivery cbadf160 (label gh-issue-tracking:init-success on plan #2). Verified live state via gh: hierarchy intact (1 plan + 7 epics #4/#11/#17/#24/#32/#34/#39 + 22 stories, all open).

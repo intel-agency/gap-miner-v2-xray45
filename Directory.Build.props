@@ -1,0 +1,12 @@
+<Project>
+  <!-- Shared MSBuild properties applied to every project under the repo root.
+       Warnings are fatal; nullable reference types and implicit usings are on. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Surface .editorconfig code-style severities (e.g. file-scoped namespaces,
+         IDE0160/IDE0161) as build diagnostics so TreatWarningsAsErrors can enforce them. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,23 @@
+# EditorConfig: https://editorconfig.org
+# Repo-wide style for GapMiner — 4-space indentation, CRLF line endings, UTF-8.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{md,markdown}]
+# Trailing double-spaces are meaningful hard line breaks in Markdown.
+trim_trailing_whitespace = false
+
+[*.sln]
+# .sln is machine-managed by Visual Studio / dotnet CLI, which writes tabs.
+indent_style = tab
+
+[*.cs]
+# File-scoped namespaces are required (story 1.1: enforced style).
+csharp_style_namespace_declarations = file_scoped:warning
