@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Story 1.2 (T-0.2): Aspire AppHost skeleton. Orchestrates the whole distributed app:
+       PostgreSQL 16 (pgvector-capable image) + Redis 7.x infrastructure and the four
+       service projects (placeholders until their epics build them out).
+       Package versions are pinned centrally in Directory.Packages.props (Aspire 8.2.x).
+       Requires the `aspire` workload (dotnet workload install aspire) for the DCP/dashboard
+       binaries and the generated Projects class — installed in CI by .github/workflows/ci.yml. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- NU1903: Aspire.Hosting 8.2.2 is flagged by CVE-2026-120006 / GHSA-f7vh-h5g3-7jrh
+         (dashboard auth-cookie disclosure via a linked attacker-controlled container; patched
+         only in Aspire 13.6.5). The development plan pins the whole stack to Aspire 8.2.x on
+         .NET 8, so the upgrade is a plan-level decision tracked in .agents/memory.md
+         (Remember To Do), not a story-level version bump. Not exploitable in this repo's
+         usage: it requires a developer authenticated to the local dashboard following a
+         resource link into an attacker-controlled container (affected platform: macOS),
+         while this AppHost orchestrates only the well-known pgvector/redis images on Linux. -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GapMiner.Api\GapMiner.Api.csproj" />
+    <ProjectReference Include="..\GapMiner.Web\GapMiner.Web.csproj" />
+    <ProjectReference Include="..\GapMiner.ScraperWorker\GapMiner.ScraperWorker.csproj" />
+    <ProjectReference Include="..\GapMiner.AIWorker\GapMiner.AIWorker.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -24,6 +24,23 @@ jobs:
             8.0.x
             10.0.x
 
+      # The aspire workload supplies the DCP/dashboard binaries and the Projects
+      # source generator required by GapMiner.AppHost (IsAspireHost / NETSDK1147).
+      # Pinned to 8.2.2 — in lockstep with the Aspire.Hosting.AppHost 8.2.2 pin
+      # in Directory.Packages.props, per .agents/rules/ci-cd.md (strict version
+      # pinning). `--version`/workload-set pinning is NOT viable on SDK 8.0.4xx:
+      # the required microsoft.net.workloads pack is not published to nuget.org
+      # (install fails and rolls back). So: install advertised, then fail loudly
+      # on any drift from the pinned version.
+      - name: Install aspire workload (pinned 8.2.2, fail on drift)
+        run: |
+          dotnet workload install aspire
+          dotnet workload list | grep -Eq 'aspire[[:space:]]+8\.2\.2/' || {
+            echo "::error::aspire workload is not at the pinned version 8.2.2 - failing to prevent silent drift";
+            dotnet workload list;
+            exit 1;
+          }
+
       - name: Install markdownlint-cli2
         run: npm install -g markdownlint-cli2@0.22.1
 
