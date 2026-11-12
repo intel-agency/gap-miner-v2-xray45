@@ -84,6 +84,9 @@ namespace GapMiner.Infrastructure.Persistence.Migrations
                 table: "feature_gap",
                 column: "competitor_target_id");
 
+            // EF 8 encodes "every column descending" as an EMPTY bool array — not
+            // all-false. MigrationRoundTripTests pins the emitted SQL via
+            // pg_get_indexdef: (severity_score DESC, mention_frequency DESC).
             migrationBuilder.CreateIndex(
                 name: "ix_feature_gap_severity_score_mention_frequency",
                 table: "feature_gap",
@@ -112,7 +115,10 @@ namespace GapMiner.Infrastructure.Persistence.Migrations
             // Not scaffolded by EF: the vector extension was created by Up, and the
             // story's rollback validation requires `database update 0` to leave no
             // orphaned objects. Safe here — every table with a vector column is
-            // already dropped above.
+            // already dropped above. Caveat: Up creates with IF NOT EXISTS (a
+            // pre-existing extension survives apply) while this drop is
+            // unconditional; extensions are database-scoped, and without CASCADE
+            // this still fails loudly if any surviving object depends on it.
             migrationBuilder.Sql("DROP EXTENSION IF EXISTS vector");
         }
     }

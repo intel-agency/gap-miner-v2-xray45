@@ -15,8 +15,9 @@
 // on the very first run — every later run would fail auth (28P01) and the Api's
 // dev-only ApplyMigrationsAsync at startup would crash the service. Aspire 8.2's
 // AddParameter has no inline default (config-only), so the ParameterResource is
-// constructed directly — rotate by changing the literal or adding
-// Parameters:postgres-password configuration for a real deployment.
+// constructed directly — its value factory returns the literal and never reads
+// Parameters: configuration. Rotate the local-dev default by changing the literal;
+// a real deployment should switch to AddParameter (config-driven) instead.
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgresPassword = builder.CreateResourceBuilder(

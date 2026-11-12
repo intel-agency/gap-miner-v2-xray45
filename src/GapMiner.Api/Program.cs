@@ -7,9 +7,10 @@
 // Story 2.2 (T-1.2): registers GapMinerDbContext against the Aspire-injected
 // "gapminer" connection string. In development only, ApplyMigrationsAsync runs at
 // startup: it creates the physical database when missing (Aspire 8.x AddDatabase does
-// not) and applies the InitialSchema migration. The AppHost waits for the postgres
-// resource before starting this service. Production applies migrations via the
-// deployment pipeline instead.
+// not) and applies the InitialSchema migration. Aspire 8.2 has no WaitFor, so the
+// AppHost does not gate this service on postgres readiness — the bounded connection
+// retry inside ApplyMigrationsAsync bridges container boot instead. Production
+// applies migrations via the deployment pipeline instead.
 using GapMiner.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

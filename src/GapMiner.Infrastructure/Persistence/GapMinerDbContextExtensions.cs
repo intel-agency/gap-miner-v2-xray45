@@ -18,8 +18,9 @@ public static class GapMinerDbContextExtensions
     /// <summary>
     /// Creates the target database when missing and applies all pending migrations.
     /// Call once at application startup in development only (the Api does this under
-    /// the AppHost, which waits for the postgres resource first); production applies
-    /// migrations through the deployment pipeline instead.
+    /// the AppHost; Aspire 8.2 has no WaitFor, so the bounded connection retry below
+    /// bridges postgres container boot); production applies migrations through the
+    /// deployment pipeline instead.
     /// </summary>
     /// <param name="serviceProvider">The application's service provider.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
@@ -69,7 +70,17 @@ public static class GapMinerDbContextExtensions
         await using var createCommand = adminConnection.CreateCommand();
         createCommand.CommandText =
             $"CREATE DATABASE \"{builder.Database.Replace("\"", "\"\"", StringComparison.Ordinal)}\"";
-        await createCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            await createCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (PostgresException ex) when (ex.SqlState == "42P04")
+        {
+            // 42P04 duplicate_database: a concurrent starter won the check-then-create
+            // race — the database exists, which is all this method needs to guarantee.
+            return;
+        }
     }
 
     private static async Task<NpgsqlConnection> OpenAdminConnectionAsync(
@@ -89,7 +100,12 @@ public static class GapMinerDbContextExtensions
                 await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
                 return connection;
             }
-            catch (NpgsqlException) when (attempt < MaxConnectionAttempts)
+            // Retry only what can be transient while the container boots: socket-level
+            // failures (no SqlState) and 57P03 "cannot connect now". Server-side
+            // rejections such as 28P01 (bad password) are permanent — fail fast
+            // instead of retrying for ~30 seconds.
+            catch (NpgsqlException ex)
+                when ((ex.SqlState is null || ex.SqlState == "57P03") && attempt < MaxConnectionAttempts)
             {
                 await Task.Delay(ConnectionRetryDelay, cancellationToken).ConfigureAwait(false);
             }

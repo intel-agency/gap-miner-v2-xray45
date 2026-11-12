@@ -59,7 +59,7 @@ public sealed class ReviewConfiguration : IEntityTypeConfiguration<Review>
                        (a, b) => (a == null && b == null)
                            || (a != null && b != null && a.SequenceEqual(b)),
                        a => a == null ? 0 : a.Select(element => element.GetHashCode())
-                           .Aggregate(HashCode.Combine),
+                           .Aggregate(                               HashCode.Combine(17),                               (accumulated, code) => HashCode.Combine(accumulated, code)),
                        a => a == null ? null : a.ToArray()));
 
         // Idempotency: (competitor_target_id, source_review_id) uniquely identifies a
