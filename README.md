@@ -59,7 +59,10 @@ the console) with PostgreSQL 16 (`pgvector/pgvector:pg16`, persistent data volum
 `gapminer` database connection string) and Redis 7.4 as container resources, plus the
 four service projects (Api, Web, ScraperWorker, AIWorker — placeholders until their
 epics build them out). Connection strings flow to the services via `IConfiguration`
-(`ConnectionStrings:gapminer`, `ConnectionStrings:redis`).
+(`ConnectionStrings:gapminer`, `ConnectionStrings:redis`). In development the Api's
+startup runs `ApplyMigrationsAsync` (`GapMiner.Infrastructure`), which creates the
+physical `gapminer` database when missing and applies the `InitialSchema` EF migration
+(tables + the pgvector `vector(3072)` embedding column).
 
 > **Note (OpenSSL ≥ 3.5 distros, e.g. Debian 13):** the DCP binary shipped with
 > Aspire 8.2.2 panics during its TLS 1.3 handshake against newer OpenSSL patches
@@ -81,7 +84,10 @@ Two suites run in CI via [`validation.ps1`](validation.ps1) (build → scan → 
 
 - **Pester** covers the repo's skill-script suites (`gh-issue-tracking-init`,
   `update-powershell-standard`, `swarm`).
-- **xUnit** covers the .NET solution (`src/GapMiner.Domain` entities, value objects, enums);
+- **xUnit** covers the .NET solution: domain entities/value objects/enums
+    (`src/GapMiner.Domain`) and the EF Core persistence layer
+    (`src/GapMiner.Infrastructure`: model conformance plus Testcontainers
+    integration tests against `pgvector/pgvector:pg16` — requires a Docker daemon);
   line coverage is enforced above 85% by coverlet.
 
 ## Linting
