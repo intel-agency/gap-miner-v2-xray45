@@ -2,6 +2,13 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:complete on story #10 (PR #46 review → merged; Epic 1 done)
+
+- Trigger: delivery 394b6370. Dispatched 3 subagent reviewers on PR #46 (head 6c753b6) with disjoint scopes (A: story/AC conformance, B: build/packaging/MSBuild, C: security + canonical fidelity). ALL THREE **CLEAN, 0 findings** — first fully-clean review round on this repo: A verified both ACs line-level + no scope creep; B verified CPM pins = the 8.2.2 template set, sln GUID wiring, launchSettings, worker SDK flips (build caveat below); C confirmed Extensions.cs verbatim vs microsoft/aspire v8.2.2 raw (118/118 lines), NU1902 rationale accurate per OSV (CVE-2026-42191, fixed 1.15.3, AV:L/AC:H/PR:L, `OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY` enabled nowhere → claim holds), secrets clean.
+- Reviewer sandbox regression (new since PR #45 round): this harness denied subagent `shell` (read-only git allowlist) AND `gh api` posting for B — B reported its verdict as a ready-to-post JSON payload instead. A and C posted via `tools.GitKraken.pull_request_create_review` (MCP) which returns no node_id — capture the numeric review id from the permalink. Fix that worked: orchestrator posts blocked reviewers' payloads verbatim via `gh api -X POST .../pulls/46/reviews --input`. Keep this fallback in reviewer task inputs.
+- B's build caveat discharged by CI: the `validate` check ran the build+Pester gate → SUCCESS on head (all checks green: validate, CodeQL, Analyze, droid-review; droid SKIPPED by design). Merge gate re-verified via GraphQL on head: 3 reviews COMMENTED, reviewThreads totalCount = 0, MERGEABLE/CLEAN → PR #46 squash-merged as **363d049**; story #10 auto-closed (CLOSED/COMPLETED) via `Closes #10`; board #95 shows #10 → Done automatically on close (no manual item-edit needed this time).
+- Pipeline advanced: epic #4 (Epic 1) had exactly 3 sub-issues, all now closed → applied `gh-issue-tracking:epic-implemented` to #4. Next run reviews Epic 1's merged PRs (#44, #45, #46), posts the progress report on plan #2, closes #4, and applies `implementation:ready` to the next unimplemented unit (lowest-numbered open story — likely #13 Story 2.1, blocked-by chain from T-0.3 now satisfied).
+
 ### 2026-11-12 — rev2 pipeline run: implementation:ready on story #10 (ServiceDefaults Project)
 
 - Trigger: delivery 0613d850. Implemented T-0.3 on branch `mn/story-1-3-service-defaults`: `src/GapMiner.ServiceDefaults` = the canonical Aspire.ProjectTemplates 8.2.2 service-defaults project (Extensions.cs verbatim from the v8.2.2 template: OTel tracing/metrics/logging via `UseOtlpExporter()` gated on OTEL_EXPORTER_OTLP_ENDPOINT, `/health` readiness + `/alive` liveness tagged "live", service discovery, standard resilience handler). NuGet versions added to CPM — exact set from the 8.2.2 nupkg: Http.Resilience 8.10.0, ServiceDiscovery 8.2.2, OTel 1.9.0 ×5.
@@ -60,6 +67,7 @@
 
 ## Completed Work Items
 
+- 2026-11-12 — Story 1.3: ServiceDefaults Project (T-0.3) (#10): PR #46 squash-merged (363d049) after a fully-clean 3-reviewer round (0 findings). Epic 1 (#4) complete — all 3 stories merged; `gh-issue-tracking:epic-implemented` applied.
 - 2026-11-12 — Story 1.2: Aspire AppHost Skeleton (T-0.2) (#8): PR #45 squash-merged (08088f8) after 3-reviewer round + 1 finding fixed (workload pin via fail-on-drift assertion). Epic 1 continues with its last story, 1.3 (#10).
 - 2026-11-12 — Story 1.1: Repository Bootstrap (T-0.1) (#6): PR #44 squash-merged (7f82ef5) after 3-reviewer round + 1 finding fixed (EnforceCodeStyleInBuild). Epic 1 continues with Story 1.2 (#8).
 
