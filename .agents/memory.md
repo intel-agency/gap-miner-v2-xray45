@@ -2,6 +2,14 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:complete on story #6 (PR #44 review → merged)
+
+- Trigger: delivery 5e919330 (label implementation:complete on story #6). Dispatched 3 subagent reviewers on PR #44 with disjoint scopes (AC conformance / security & CI / MSBuild semantics): two clean, one minor finding — `.editorconfig` code-style severities (file_scoped:warning) are inert in `dotnet build` without `EnforceCodeStyleInBuild`. Fixed in c9759e0 (one property in Directory.Build.props, validated: build 0 errors, gitleaks clean, Pester 266/266, coverage 95.38%), thread replied + resolved via GraphQL → 0 unresolved.
+- Merge gate re-verified on head c9759e0 (all checks green, MERGEABLE/CLEAN, 0 unresolved threads) → PR #44 squash-merged as 7f82ef5; story #6 auto-closed via `Closes #6`; board #95 card → Status: Done. Pipeline advanced: `implementation:ready` applied to #8 (Story 1.2: Aspire AppHost Skeleton; its only blocker #6 is closed).
+- Review-subagent contract that worked: each reviewer got ONE scope, exact file list + head SHA, a ready-to-use jq/REST command template for posting the review, read-only constraints, and a fixed report format — all three returned within one round with verifiable evidence (review IDs).
+- gh gotchas hit this run: `gh api graphql -f query=@file` sends the literal string — use uppercase `-F query=@file` to read from file; `addPullRequestReviewThreadReply` takes NO `inReplyTo` argument (thread ID alone anchors the reply); this gh version's `gh project item-list --format json` omits fieldValues — verify board updates by GraphQL node query on the ProjectV2Item id; `gh project item-edit <number> --owner <org> --url <issue-url> --field Status --value Done`.
+- Reconfirmed: local .NET 8 SDK needs `export DOTNET_ROOT=$HOME/.dotnet PATH=$HOME/.dotnet:$PATH` before `validation.ps1` (global.json 8.0.x pin does not roll to SDK 10).
+
 ### 2026-11-12 — rev2 pipeline run: implementation:ready on story #6 (Repository Bootstrap)
 
 - Trigger: delivery 5cd35350 (label implementation:ready on story #6). Implemented Story 1.1 (T-0.1) on branch `mn/story-1-1-repository-bootstrap`: global.json (8.0.404 + rollForward latestFeature), Directory.Packages.props (CPM, 18 pinned PackageVersion entries covering every plan §3 row that maps to NuGet), Directory.Build.props (TreatWarningsAsErrors/Nullable/ImplicitUsings), .editorconfig (file-scoped namespaces warning, 4-space, CRLF, md/sln exceptions), GapMiner.sln with src+tests solution folders; `dotnet build GapMiner.sln` exit 0.
@@ -23,7 +31,7 @@
 
 ## Completed Work Items
 
-*Finished work will be logged here.*
+- 2026-11-12 — Story 1.1: Repository Bootstrap (T-0.1) (#6): PR #44 squash-merged (7f82ef5) after 3-reviewer round + 1 finding fixed (EnforceCodeStyleInBuild). Epic 1 continues with Story 1.2 (#8).
 
 ## Decisions
 
