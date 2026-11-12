@@ -2,6 +2,14 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:complete on story #15 (PR #50 review → merged; Epic 2 complete → epic-implemented on #11)
+
+- Trigger: delivery 28b5d100. 3-reviewer round on PR #50 (head 4bbdb4a) with disjoint scopes, ALL CLEAN (0 major, 0 minor, 3 nits): A AC-conformance (review 5879191302) 5/5 ACs + 4/4 tasks line-level, out-of-scope files adjudicated enabling/bookkeeping; B build/packaging (5879200107) CPM pins pre-existed verbatim, versionless refs, gate needs no change — 1 nit: `StackExchange.Redis` 3.4.35 stable exists (HELD: plan §3 pin governance, Npgsql/Pgvector hold precedent); C semantics/tests/security (5879206794) polling loop, cancellation, JSON options, test flake-risk all adjudicated sound — 2 doc nits.
+- Both C nits fixed in 0e34a0b (comment-only: poison-message semantics remarks block on `RedisJobQueue`, wire-format intent comment on the exact-match raw-JSON assert); validation re-run green before push (build 0/0, gitleaks clean, Pester 266/266, dotnet test green, Infrastructure line 95.73%). Consolidated disposition comment on PR #50 (6831289586) — body-only COMMENT reviews create 0 threads by construction, so the disposition comment IS the resolution record (#48/#49 pattern).
+- Merge gate verified on head 0e34a0b (checks 5/5 GREEN incl. validate 2m8s + Analyze csharp 2m6s; MERGEABLE/CLEAN; 0 unresolved of 0 threads via GraphQL) → PR #50 squash-merged as bce2dab; story #15 auto-closed (CLOSED/COMPLETED via `Closes #15`); branch deleted.
+- Epic #11 (Epic 2) sub-issues all closed (#12–#15) → applied `gh-issue-tracking:epic-implemented` to #11. Next run: review Epic 2's merged PRs (#47–#50), post the epic progress report on plan #2, close #11, then apply `implementation:ready` to the next unimplemented unit (lowest-numbered open story — Epic 3 territory under #17; next run decides from live state).
+- Posting-channel note: `gh api` POST worked directly for all three subagent reviewers this round (no sandbox blocks, no GitKraken escalation) — the escalation runbook stays in reviewer task inputs regardless.
+
 ### 2026-11-12 — rev2 pipeline run: implementation:ready on story #15 (Redis Queue Abstraction implemented; PR opened)
 
 - Trigger: delivery d07accd0. Implemented Story 2.4 (T-1.4, LAST story of epic #11) on branch `mn/story-2-4-redis-queue-abstraction`: `src/GapMiner.Infrastructure/Queueing/` — `IJobQueue<TCommand>` (`EnqueueAsync`/`DequeueAsync`/`LengthAsync`, all with CancellationToken per R4) + `RedisJobQueue<TCommand>` on a StackExchange.Redis list: FIFO via RPUSH (tail) / polled LPOP (head); blocking `DequeueAsync` = BRPOP pattern as polling with configurable `dequeueTimeout` (default 5 s) + `pollInterval` (default 250 ms) — literal BRPOP would pop the tail RPUSH just pushed (LIFO); JSON via `JsonSerializerDefaults.Web` + `DefaultIgnoreCondition = WhenWritingNull` (camelCase, nulls ignored); monotonic deadline via `Stopwatch.GetTimestamp()`/`GetElapsedTime`.
@@ -131,6 +139,7 @@
 
 ## Completed Work Items
 
+- 2026-11-12 — Story 2.4: Redis Queue Abstraction (T-1.4) (#15): PR #50 squash-merged (bce2dab) after a fully-clean 3-reviewer round (0 major/minor; 2 doc nits fixed in 0e34a0b, 1 plan-pin hold). Epic 2 (#11) complete — all 4 stories merged; `gh-issue-tracking:epic-implemented` applied to #11.
 - 2026-11-12 — Story 2.3: Repository Layer (T-1.3) (#14): PR #49 squash-merged (c6d024f) after 3-reviewer round (0 major; 1 minor + 2 nits, all fixed in f44eda8; MD033 CI break fixed in ae89e4a). Pipeline advanced to Story 2.4 (#15) — last story of Epic 2 (#11).
 - 2026-11-12 — Story 2.2: EF Core DbContext & Migrations (T-1.2) (#13): PR #48 squash-merged (5afff90) after 3-reviewer round (11 findings, all minor/nit — 9 fixed, 2 plan-pin holds documented in 4183115). Pipeline advanced to Story 2.3 (#14).
 - 2026-11-12 — Story 2.1: Domain Entities (T-1.1) (#12): PR #47 squash-merged (0716e47) after 3-reviewer round (A/B clean, C 5 findings all fixed in 95ee28d). Pipeline advanced to Story 2.2 (#13).
