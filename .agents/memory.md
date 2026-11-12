@@ -2,6 +2,15 @@
 
 ## Current Activity
 
+### 2026-11-12 — rev2 pipeline run: implementation:complete on story #8 (PR #45 review → merged)
+
+- Trigger: delivery 73159ae0. Dispatched 3 subagent reviewers on PR #45 (head 471900a) with disjoint scopes (A: story/AC conformance, B: build/packaging/CI, C: security+placeholders). A and C CLEAN (A verified all 5 ACs line-level); B found 1 minor: unpinned `dotnet workload install aspire` in ci.yml (violates .agents/rules/ci-cd.md pinning).
+- Workload pinning dead end (lesson for any future workload pin): `dotnet workload install aspire --version 8.2.2` (workload-set mode) FAILS and ROLLS BACK on SDK 8.0.4xx — the required `microsoft.net.workloads` pack is not published to nuget.org; the band-qualified form `8.2.2/8.0.100` is rejected as invalid syntax. SIDE EFFECT of the failed attempt: it flips local install mode to workload-set AND uninstalls the previously installed workload — a plain `dotnet workload install aspire` restores it. Fix that finally worked: advertised install + fail-on-drift assertion in ci.yml (`dotnet workload list | grep -Eq 'aspire\s+8\.2\.2/'` else red job) — commit 583c486; the CI validate job ran green through the assertion.
+- Thread 4551613707 replied (4551672194) + resolved via GraphQL; merge gate re-verified on head 583c486 (checks green, MERGEABLE, 0 unresolved of 1 thread) → PR #45 squash-merged as 08088f8; story #8 auto-closed via `Closes #8`; board #95: #8→Done, #10→In Progress (verified via GraphQL fieldValues).
+- gh/GraphQL gotchas this run: `addPullRequestReviewThreadReply` input field is `pullRequestReviewThreadId` (NOT `threadId`); `ProjectV2Item` has no `fieldValue(name:)` scalar — read `fieldValues(first:n){nodes{... on ProjectV2ItemFieldSingleSelectValue{name}}}`; GET on a single pulls/comments/{id} path 404s even when the comment exists — list via pulls/{n}/comments instead.
+- Reviewer contract update: GitHub rejects APPROVE reviews from the PR author's own token ("Can not approve your own pull request") — reviewers posting with the orchestrator account must use COMMENT-state reviews with the verdict in the body; do not instruct `--approve`.
+- Pipeline advanced: `implementation:ready` on #10 (Story 1.3: ServiceDefaults Project) — epic #4's LAST open story; when it merges, epic #4 gets `gh-issue-tracking:epic-implemented`.
+
 ### 2026-11-12 — rev2 pipeline run: implementation:ready on story #8 (Aspire AppHost Skeleton)
 
 - Trigger: delivery b57a3150 (label implementation:ready on story #8). Implemented T-0.2 on branch `mn/story-1-2-aspire-apphost-skeleton`: `src/GapMiner.AppHost` (Aspire.Hosting.AppHost 8.2.2 + PostgreSQL/Redis integration packages, IsAspireHost, launchSettings pinning dashboard `https://localhost:18888` + OTLP 18890 + resource-service 18891), Postgres via `WithImage("pgvector/pgvector").WithImageTag("pg16")` + `WithDataVolume()` + `AddDatabase("gapminer")`, Redis pinned `WithImageTag("7.4")`, and minimal placeholder projects Api/Web/ScraperWorker/AIWorker wired with WithReference (the plan's `Projects.*` wiring needs the projects to exist; later epics build them out).
@@ -41,6 +50,7 @@
 
 ## Completed Work Items
 
+- 2026-11-12 — Story 1.2: Aspire AppHost Skeleton (T-0.2) (#8): PR #45 squash-merged (08088f8) after 3-reviewer round + 1 finding fixed (workload pin via fail-on-drift assertion). Epic 1 continues with its last story, 1.3 (#10).
 - 2026-11-12 — Story 1.1: Repository Bootstrap (T-0.1) (#6): PR #44 squash-merged (7f82ef5) after 3-reviewer round + 1 finding fixed (EnforceCodeStyleInBuild). Epic 1 continues with Story 1.2 (#8).
 
 ## Decisions
@@ -51,3 +61,4 @@
 
 - Plan-level decision needed: the Aspire 8.2.2 pin cannot clear CVE-2026-120006 (GHSA-f7vh-h5g3-7jrh, patched only in 13.6.5) and its DCP breaks on OpenSSL ≥3.5 distros (fixed in Aspire ≥13.3.1). A future epic/plan revision should decide when to bump the Aspire stack (requires .NET 10-era SDK + Aspire.AppHost.Sdk); NU1903 is NoWarn-suppressed in src/GapMiner.AppHost/GapMiner.AppHost.csproj until then.
 - Story 2.2 (EF Core DbContext & Migrations): create the physical `gapminer` database (Aspire 8.x AddDatabase does not) and `HasPostgresExtension("vector")` — pgvector capability was proven live in Story 1.2's container.
+- Story 5.1 (Minimal API Endpoints): remove or gate the placeholder `/connection-strings` endpoint on Api (reviewer C, PR #45 — keys-only today, but not for a real API).
