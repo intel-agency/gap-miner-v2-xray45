@@ -7,12 +7,11 @@ namespace GapMiner.Domain.Tests;
 
 public class ImmutabilityTests
 {
-    public static TheoryData<Type> EntityTypes => new()
-    {
-        typeof(CompetitorTarget),
-        typeof(Review),
-        typeof(FeatureGap),
-    };
+    // Derived from the assembly so entities added later are guarded automatically.
+    public static TheoryData<Type> EntityTypes => new(
+        typeof(CompetitorTarget).Assembly
+            .GetExportedTypes()
+            .Where(t => t.IsClass && t.Namespace == "GapMiner.Domain.Entities"));
 
     [Theory]
     [MemberData(nameof(EntityTypes))]
@@ -20,7 +19,9 @@ public class ImmutabilityTests
     {
         foreach (var property in entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            var setter = property.GetSetMethod(nonPublic: false);
+            // nonPublic: true so a private/internal setter is still found and must
+            // prove init-only (nonPublic: false conflates it with get-only).
+            var setter = property.GetSetMethod(nonPublic: true);
 
             if (setter is null)
             {

@@ -82,7 +82,7 @@ public class ReviewTests
     }
 
     [Fact]
-    public void Constructor_EmbddingDefaultsToNull()
+    public void Constructor_EmbeddingDefaultsToNull()
     {
         var review = new Review(
             id: Guid.NewGuid(),

@@ -22,6 +22,7 @@ public class SeverityScoreTests
     [InlineData(-1.0)]
     [InlineData(10.01)]
     [InlineData(double.MaxValue)]
+    [InlineData(double.NegativeInfinity)]
     public void Create_RejectsValuesOutsideRange(double value)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => SeverityScore.Create(value));

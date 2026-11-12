@@ -79,7 +79,8 @@ Two suites run in CI via [`validation.ps1`](validation.ps1) (build → scan → 
 ./validation.ps1 -Step test # Pester (skill scripts) + dotnet test (solution, coverage-gated)
 ```
 
-- **Pester** covers the `gh-issue-tracking-init` skill scripts (101 tests across three files).
+- **Pester** covers the repo's skill-script suites (`gh-issue-tracking-init`,
+  `update-powershell-standard`, `swarm`).
 - **xUnit** covers the .NET solution (`src/GapMiner.Domain` entities, value objects, enums);
   line coverage is enforced above 85% by coverlet.
 
