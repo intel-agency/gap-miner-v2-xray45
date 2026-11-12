@@ -83,6 +83,9 @@ public sealed class RedisJobQueueTests(RedisFixture fixture)
         await queue.EnqueueAsync(command);
 
         var stored = await fixture.Redis.GetDatabase().ListGetByIndexAsync(key, -1);
+        // Exact match is deliberate: it pins the whole wire format (camelCase
+        // naming, elided nulls, declaration-order properties) so any drift in
+        // the serializer options fails here first.
         Assert.Equal(
             """{"targetId":"01234567-89ab-cdef-0123-456789abcdef","marketplaceUrl":"https://apps.shopify.com/rank-tracker-pro"}""",
             stored.ToString());

@@ -18,6 +18,12 @@ namespace GapMiner.Infrastructure.Queueing;
 /// dequeue timeout elapses. A literal BRPOP would pop the tail an RPUSH just
 /// pushed — LIFO, not FIFO — so the head is polled instead.
 /// </remarks>
+/// <remarks>
+/// An entry that fails JSON deserialization propagates
+/// <see cref="JsonException"/> after having been popped — the message is not
+/// re-queued. This fails loud for single-writer queues; dead-lettering belongs
+/// to consumer error handling.
+/// </remarks>
 public sealed class RedisJobQueue<TCommand> : IJobQueue<TCommand> where TCommand : class
 {
     /// <summary>The dequeue timeout used when none is configured.</summary>
