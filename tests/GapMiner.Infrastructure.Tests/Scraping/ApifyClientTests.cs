@@ -95,7 +95,7 @@ public sealed class ApifyClientTests
         var request = Assert.Single(recorder.Requests);
         Assert.Equal(HttpMethod.Post, request.Method);
         Assert.Equal(
-            "/v2/acts/apify~web-scraper/run-sync-get-dataset-items?timeout=300&maxItems=50",
+            "/v2/actors/apify~web-scraper/run-sync-get-dataset-items?timeout=300&maxItems=50",
             request.RequestUri!.PathAndQuery);
         Assert.Equal($"Bearer {Token}", request.Headers.Authorization?.ToString());
         Assert.Equal("application/json", request.Content?.Headers.ContentType?.MediaType);
@@ -117,7 +117,7 @@ public sealed class ApifyClientTests
         await client.RunSyncGetDatasetItemsAsync("apify~web-scraper", new { startUrl = "https://example.com" });
 
         var request = Assert.Single(recorder.Requests);
-        Assert.Equal("/v2/acts/apify~web-scraper/run-sync-get-dataset-items", request.RequestUri!.PathAndQuery);
+        Assert.Equal("/v2/actors/apify~web-scraper/run-sync-get-dataset-items", request.RequestUri!.PathAndQuery);
     }
 
     [Fact]
@@ -140,7 +140,7 @@ public sealed class ApifyClientTests
         var request = Assert.Single(recorder.Requests);
         Assert.Equal(HttpMethod.Post, request.Method);
         Assert.Equal(
-            "/v2/acts/apify~web-scraper/runs?timeout=300&maxItems=50",
+            "/v2/actors/apify~web-scraper/runs?timeout=300&maxItems=50",
             request.RequestUri!.PathAndQuery);
         Assert.Equal($"Bearer {Token}", request.Headers.Authorization?.ToString());
         Assert.Equal("application/json", request.Content?.Headers.ContentType?.MediaType);
@@ -165,7 +165,7 @@ public sealed class ApifyClientTests
         await client.RunActorAsync("apify~web-scraper", new { startUrl = "https://example.com" });
 
         var request = Assert.Single(recorder.Requests);
-        Assert.Equal("/v2/acts/apify~web-scraper/runs", request.RequestUri!.PathAndQuery);
+        Assert.Equal("/v2/actors/apify~web-scraper/runs", request.RequestUri!.PathAndQuery);
     }
 
     [Fact]

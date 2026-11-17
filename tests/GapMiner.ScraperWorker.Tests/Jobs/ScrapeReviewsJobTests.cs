@@ -457,6 +457,35 @@ public sealed class ScrapeReviewsJobTests
         Assert.DoesNotContain(logger.Entries, entry => entry.Level == LogLevel.Error);
     }
 
+    [Fact]
+    public async Task Folds_a_client_timeout_into_a_structured_failure_instead_of_treating_it_as_cancellation()
+    {
+        var target = Target(
+            MarketplaceKind.ShopifyAppStore,
+            "https://apps.shopify.com/judgeme/reviews");
+        ScriptTarget(target);
+        // The HttpClient.Timeout shape: a TaskCanceledException while the
+        // lifecycle's own token is NOT canceled. That is a step failure —
+        // it must reach the structured failure log, not escape as
+        // "cancellation" (the review-round regression this pins).
+        apifyClient.RunActorAsync(
+                Arg.Any<string>(), Arg.Any<object>(), Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<int?>(),
+                Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new TaskCanceledException(
+                "A task was canceled."));
+
+        var result = await CreateJob().ExecuteAsync(new ScrapeTargetCommand(target.Id));
+
+        Assert.Equal(ScrapeReviewsJobStatus.Failed, result.Status);
+        Assert.StartsWith("RunStartFailed", result.FailureReason);
+        Assert.Contains("TaskCanceledException", result.FailureReason);
+
+        var failure = logger.Entries.Single(entry => entry.Level == LogLevel.Error);
+        Assert.Equal(result.JobId.ToString(), failure.State["JobId"]!.ToString());
+        Assert.Equal(target.Id.ToString(), failure.State["TargetId"]!.ToString());
+        Assert.Equal(result.FailureReason, failure.State["FailureReason"]!.ToString());
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]

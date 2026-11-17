@@ -13,7 +13,7 @@ namespace GapMiner.Infrastructure.Scraping;
 /// <param name="ActorId">
 /// The actor ID in the Apify API's <c>username~actor-name</c> form (e.g.
 /// <c>apify~web-scraper</c>) — the single-segment form the
-/// <c>/v2/acts/{actorId}/…</c> endpoints require; the store-URL form with a
+/// <c>/v2/actors/{actorId}/…</c> endpoints require; the store-URL form with a
 /// slash would break path routing.
 /// </param>
 /// <param name="SourceReviewIdFieldName">

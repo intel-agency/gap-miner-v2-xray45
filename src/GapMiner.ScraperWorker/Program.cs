@@ -1,5 +1,5 @@
 // Story 3.3 (T-2.3): the scraping worker's composition root. Hangfire runs
-// ScrapeReviewsJob as the recurring scrape-reviews job (every 15s) which
+// ScrapeReviewsJob as the recurring scrape-reviews job (every minute) which
 // dequeues ScrapeTargetCommands from the Redis scrape queue and executes the
 // 9-step scrape lifecycle per command. Everything the job consumes comes from
 // the Epic 2/3 layers: the Redis queue abstraction, the EF repositories, the
@@ -69,6 +69,11 @@ using (var scope = app.Services.CreateScope())
     // dequeues at most one command and runs the full scrape lifecycle for it;
     // overlapping ticks are separate jobs, so queue concurrency is bounded by
     // the Hangfire server's worker pool, not the cron.
+    //
+    // CancellationToken.None is Hangfire's documented placeholder, not a dead
+    // wire: CoreBackgroundJobPerformer substitutes every CancellationToken
+    // parameter with its own shutdown-aware token just before performing the
+    // job, so host shutdown does cancel an in-flight lifecycle.
     var recurringJobs = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
     recurringJobs.AddOrUpdate(
         "scrape-reviews",

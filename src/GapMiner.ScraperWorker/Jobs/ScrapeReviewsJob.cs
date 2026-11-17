@@ -24,7 +24,7 @@ namespace GapMiner.ScraperWorker.Jobs;
 /// <remarks>
 /// <para>
 /// <b>Hangfire registration.</b> The recurring job
-/// <c>scrape-reviews</c> (every <see cref="RecurrenceInterval"/>, see
+/// <c>scrape-reviews</c> (cron <see cref="RecurrenceCron"/>, see
 /// Program.cs) runs <see cref="RunPendingAsync"/> — lifecycle step 1. Each
 /// tick dequeues at most one command (the destructive LPOP of the Redis queue
 /// guarantees a command is never processed twice concurrently) and executes
@@ -190,6 +190,11 @@ public sealed class ScrapeReviewsJob
     /// </summary>
     /// <param name="cancellationToken">
     /// The scheduler's shutdown token, propagated through the lifecycle (R4).
+    /// Hangfire replaces the serialized <c>CancellationToken.None</c>
+    /// placeholder with its own shutdown-aware token just before performing
+    /// the job (<c>CoreBackgroundJobPerformer</c> substitutes every
+    /// <see cref="CancellationToken"/> parameter), so the recurring
+    /// registration in Program.cs does wire real shutdown into the lifecycle.
     /// </param>
     [AutomaticRetry(Attempts = 0)]
     public async Task RunPendingAsync(CancellationToken cancellationToken = default)
@@ -232,10 +237,13 @@ public sealed class ScrapeReviewsJob
         {
             return Fail(jobId, targetId, failure.Reason, failure.InnerException);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Host shutdown is not a pipeline failure: the aborted tick is
             // visible in the scheduler; the command can be safely re-enqueued.
+            // The filter matters: an OperationCanceledException without a
+            // canceled caller token (HttpClient.Timeout's TaskCanceledException)
+            // is a failure and falls through to the structured failure path.
             throw;
         }
         catch (Exception unexpected)
@@ -259,7 +267,8 @@ public sealed class ScrapeReviewsJob
         // contract.
         var target = await StepAsync(
             () => targetRepository.GetByIdAsync(targetId, cancellationToken),
-            "TargetLoadFailed").ConfigureAwait(false);
+            "TargetLoadFailed",
+            cancellationToken).ConfigureAwait(false);
         if (target is null)
         {
             throw new ScrapeFailureException($"TargetNotFound: no competitor target {targetId} exists.");
@@ -281,7 +290,8 @@ public sealed class ScrapeReviewsJob
         var runInput = BuildRunInput(target, entry);
         var start = await StepAsync(
             () => apifyClient.RunActorAsync(entry.ActorId, runInput, cancellationToken: cancellationToken),
-            "RunStartFailed").ConfigureAwait(false);
+            "RunStartFailed",
+            cancellationToken).ConfigureAwait(false);
         var runId = start.Data?.Id;
         if (string.IsNullOrWhiteSpace(runId))
         {
@@ -300,7 +310,8 @@ public sealed class ScrapeReviewsJob
         // Step 5: download the dataset items.
         var items = await StepAsync(
             () => apifyClient.GetDatasetItemsAsync(datasetId, clean: true, cancellationToken: cancellationToken),
-            "DatasetDownloadFailed").ConfigureAwait(false);
+            "DatasetDownloadFailed",
+            cancellationToken).ConfigureAwait(false);
 
         // Step 6: map through the registry field mapping.
         var mapping = mapper.Map(entry, items, targetId);
@@ -313,17 +324,20 @@ public sealed class ScrapeReviewsJob
         // Step 7: idempotent bulk insert (duplicates ignored, in-batch included).
         var inserted = await StepAsync(
             () => reviewRepository.BulkInsertIgnoreDuplicatesAsync(negativeReviews, cancellationToken),
-            "ReviewInsertFailed").ConfigureAwait(false);
+            "ReviewInsertFailed",
+            cancellationToken).ConfigureAwait(false);
 
         // Step 8: hand the target to the analysis pipeline.
         await StepAsync(
             () => analysisQueue.EnqueueAsync(new AnalyzeReviewsCommand(targetId), cancellationToken),
-            "AnalysisEnqueueFailed").ConfigureAwait(false);
+            "AnalysisEnqueueFailed",
+            cancellationToken).ConfigureAwait(false);
 
         // Step 9: stamp the target's last-scraped moment.
         await StepAsync(
             () => targetRepository.MarkScrapedAsync(targetId, DateTimeOffset.UtcNow, cancellationToken),
-            "LastScrapedAtStampFailed").ConfigureAwait(false);
+            "LastScrapedAtStampFailed",
+            cancellationToken).ConfigureAwait(false);
 
         var result = new ScrapeReviewsJobResult(
             Status: ScrapeReviewsJobStatus.Succeeded,
@@ -365,7 +379,8 @@ public sealed class ScrapeReviewsJob
 
             var response = await StepAsync(
                 () => apifyClient.GetActorRunAsync(runId, pollInterval.TotalSeconds, cancellationToken),
-                "RunStatusPollFailed").ConfigureAwait(false);
+                "RunStatusPollFailed",
+                cancellationToken).ConfigureAwait(false);
 
             var run = response.Data;
             if (run is null || string.IsNullOrWhiteSpace(run.Status))
@@ -389,7 +404,8 @@ public sealed class ScrapeReviewsJob
             if (Stopwatch.GetElapsedTime(startedAt) >= runTimeout)
             {
                 throw new ScrapeFailureException(
-                    $"RunTimedOut: run {runId} did not reach a terminal status within {runTimeout}.");
+                    $"RunTimedOut: run {runId} exceeded the {runTimeout} run timeout without a terminal "
+                    + "status (deadline checked between polls).");
             }
         }
     }
@@ -469,15 +485,23 @@ public sealed class ScrapeReviewsJob
     /// cancellation, which propagates) into a
     /// <see cref="ScrapeFailureException"/> whose reason is prefixed with the
     /// step name — from the job's perspective, whatever went wrong inside a
-    /// step, that step failed.
+    /// step, that step failed. Only an <see cref="OperationCanceledException"/>
+    /// thrown while the lifecycle's own token is actually canceled escapes the
+    /// folding: a <see cref="TaskCanceledException"/> from a source other than
+    /// the caller's token (the <c>HttpClient.Timeout</c> case) is a step
+    /// failure like any other and must reach the structured failure log, not
+    /// masquerade as host shutdown.
     /// </summary>
-    private static async Task<T> StepAsync<T>(Func<Task<T>> step, string failurePrefix)
+    private static async Task<T> StepAsync<T>(
+        Func<Task<T>> step,
+        string failurePrefix,
+        CancellationToken cancellationToken)
     {
         try
         {
             return await step().ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
@@ -488,13 +512,16 @@ public sealed class ScrapeReviewsJob
     }
 
     /// <summary>The task-returning counterpart for steps that produce no value.</summary>
-    private static async Task StepAsync(Func<Task> step, string failurePrefix)
+    private static async Task StepAsync(
+        Func<Task> step,
+        string failurePrefix,
+        CancellationToken cancellationToken)
     {
         try
         {
             await step().ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
