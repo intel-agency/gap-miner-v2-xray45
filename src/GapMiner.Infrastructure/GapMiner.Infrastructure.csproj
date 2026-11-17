@@ -30,6 +30,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Story 3.1 (T-2.1): typed Apify v2 REST client. Refit 7.2.1 is the
+         plan §3 "HTTP Client" pin; the Polly retry pipeline comes from
+         Microsoft.Extensions.Http.Resilience (Polly v8) — the resilience
+         package Story 1.3 already pinned with the ServiceDefaults template
+         set, so no new transitive stack is introduced. -->
+    <PackageReference Include="Refit.HttpClientFactory" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GapMiner.Domain\GapMiner.Domain.csproj" />
   </ItemGroup>
 

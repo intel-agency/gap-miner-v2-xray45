@@ -23,7 +23,15 @@
          usage: it requires a developer authenticated to the local dashboard following a
          resource link into an attacker-controlled container (affected platform: macOS),
          while this AppHost orchestrates only the well-known pgvector/redis images on Linux. -->
-    <NoWarn>$(NoWarn);NU1903</NoWarn>
+    <!-- NU1904: Aspire.Dashboard.Sdk.linux-x64 8.2.2 is flagged by CVE-2026-118740 /
+         GHSA-4g86-54fm-h9h8 (dashboard unauthenticated NotFound route can delete telemetry;
+         browser-token disclosure applies only to STANDALONE dashboard deployments; patched
+         only in Aspire 13.6.5). Same plan-level pin as NU1903 above — the Aspire bump stays
+         a plan-level decision in .agents/memory.md (Remember To Do). Not exploitable in this
+         repo's usage: the dashboard runs only as a loopback dev-time surface on the
+         developer's machine (https://localhost:18888 pinned in launchSettings, never a
+         standalone deployment), so there is no network-reachable unauthenticated route. -->
+    <NoWarn>$(NoWarn);NU1903;NU1904</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
