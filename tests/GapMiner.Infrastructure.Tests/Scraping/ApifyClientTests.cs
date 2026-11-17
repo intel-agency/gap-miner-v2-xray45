@@ -95,7 +95,7 @@ public sealed class ApifyClientTests
         var request = Assert.Single(recorder.Requests);
         Assert.Equal(HttpMethod.Post, request.Method);
         Assert.Equal(
-            "/v2/acts/apify~web-scraper/run-sync-get-dataset-items?timeout=300&maxItems=50",
+            "/v2/actors/apify~web-scraper/run-sync-get-dataset-items?timeout=300&maxItems=50",
             request.RequestUri!.PathAndQuery);
         Assert.Equal($"Bearer {Token}", request.Headers.Authorization?.ToString());
         Assert.Equal("application/json", request.Content?.Headers.ContentType?.MediaType);
@@ -117,7 +117,55 @@ public sealed class ApifyClientTests
         await client.RunSyncGetDatasetItemsAsync("apify~web-scraper", new { startUrl = "https://example.com" });
 
         var request = Assert.Single(recorder.Requests);
-        Assert.Equal("/v2/acts/apify~web-scraper/run-sync-get-dataset-items", request.RequestUri!.PathAndQuery);
+        Assert.Equal("/v2/actors/apify~web-scraper/run-sync-get-dataset-items", request.RequestUri!.PathAndQuery);
+    }
+
+    [Fact]
+    public async Task RunActor_posts_input_bearer_and_query_to_the_run_start_endpoint()
+    {
+        var handler = new RecordingHttpMessageHandler(() => Json(HttpStatusCode.Created, RunJson));
+        var (client, recorder) = CreateClient(handler);
+
+        var response = await client.RunActorAsync(
+            "apify~web-scraper",
+            new Dictionary<string, object?>
+            {
+                ["startUrls"] = new[] { new Dictionary<string, string> { ["url"] = "https://example.com" } },
+                ["minRating"] = 1,
+                ["maxRating"] = 3,
+            },
+            timeout: 300,
+            maxItems: 50);
+
+        var request = Assert.Single(recorder.Requests);
+        Assert.Equal(HttpMethod.Post, request.Method);
+        Assert.Equal(
+            "/v2/actors/apify~web-scraper/runs?timeout=300&maxItems=50",
+            request.RequestUri!.PathAndQuery);
+        Assert.Equal($"Bearer {Token}", request.Headers.Authorization?.ToString());
+        Assert.Equal("application/json", request.Content?.Headers.ContentType?.MediaType);
+        Assert.Equal(
+            """{"startUrls":[{"url":"https://example.com"}],"minRating":1,"maxRating":3}""",
+            Assert.Single(recorder.RequestBodies));
+
+        // The 201 response is the { data: { run } } envelope the poll loop
+        // seeds from: run id, status, and the dataset id the download step uses.
+        var run = Assert.IsType<ApifyActorRun>(response.Data);
+        Assert.Equal("HG7ML7M8z78YcAPEB", run.Id);
+        Assert.Equal(ApifyRunStatus.Succeeded, run.Status);
+        Assert.Equal("wmKPijuyDnPZAPRMk", run.DefaultDatasetId);
+    }
+
+    [Fact]
+    public async Task RunActor_omits_unset_query_parameters()
+    {
+        var handler = new RecordingHttpMessageHandler(() => Json(HttpStatusCode.Created, RunJson));
+        var (client, recorder) = CreateClient(handler);
+
+        await client.RunActorAsync("apify~web-scraper", new { startUrl = "https://example.com" });
+
+        var request = Assert.Single(recorder.Requests);
+        Assert.Equal("/v2/actors/apify~web-scraper/runs", request.RequestUri!.PathAndQuery);
     }
 
     [Fact]

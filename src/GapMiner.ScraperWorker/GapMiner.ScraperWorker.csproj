@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <!-- Placeholder for Epic 3 (T-2.x): background worker that scrapes marketplace
-       reviews; wired into the AppHost by Story 1.2 so connection strings flow through
-       IConfiguration. Story 1.3 hosts it on the Web SDK so the ServiceDefaults health
-       endpoints (/health, /alive) are served; Epic 3 adds the hosted services to this
-       host. -->
+  <!-- Story 3.3 (T-2.3): the scraping background worker. Hangfire drives the
+       ScrapeReviewsJob (registered as the recurring scrape-reviews job that
+       dequeues ScrapeTargetCommands from the Redis scrape queue); the web host
+       stays so the ServiceDefaults endpoints (/health, /alive) remain served
+       (Story 1.3), and the Hangfire dashboard is exposed at /hangfire. -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,7 +12,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Job scheduler: DI/server/dashboard integration + Redis storage at the
+         plan's Hangfire 1.8.x pin (versions centrally in Directory.Packages.props). -->
+    <PackageReference Include="Hangfire.AspNetCore" />
+    <PackageReference Include="Hangfire.Redis.StackExchange" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GapMiner.ServiceDefaults\GapMiner.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\GapMiner.Infrastructure\GapMiner.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

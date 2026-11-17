@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.Infrastructure", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.Infrastructure.Tests", "tests\GapMiner.Infrastructure.Tests\GapMiner.Infrastructure.Tests.csproj", "{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GapMiner.ScraperWorker.Tests", "tests\GapMiner.ScraperWorker.Tests\GapMiner.ScraperWorker.Tests.csproj", "{2E0DEF68-7A16-485F-B58F-379906BE8AE7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,7 @@ Global
 		{01BF553B-4BDC-433A-9F38-A28E2966C2BD} = {B37D0A54-2712-420C-9359-2A496109A0DF}
 		{07708C15-BB5F-4A93-BA33-E98C635890CD} = {709B05B9-A98F-47E9-9038-06B057AFAD32}
 		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E} = {B37D0A54-2712-420C-9359-2A496109A0DF}
+		{2E0DEF68-7A16-485F-B58F-379906BE8AE7} = {B37D0A54-2712-420C-9359-2A496109A0DF}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{9B0FA320-8074-47EE-B030-6C848D14C829}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -87,5 +90,9 @@ Global
 		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3297DF83-14E8-4E5B-A24E-8143C2B8F21E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E0DEF68-7A16-485F-B58F-379906BE8AE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0DEF68-7A16-485F-B58F-379906BE8AE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0DEF68-7A16-485F-B58F-379906BE8AE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0DEF68-7A16-485F-B58F-379906BE8AE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

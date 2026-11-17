@@ -35,6 +35,10 @@ namespace GapMiner.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTimeOffset?>("LastScrapedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_scraped_at");
+
                     b.Property<string>("MarketplaceKind")
                         .IsRequired()
                         .HasColumnType("text")

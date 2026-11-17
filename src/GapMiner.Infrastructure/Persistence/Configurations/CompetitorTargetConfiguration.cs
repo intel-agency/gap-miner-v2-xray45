@@ -34,5 +34,10 @@ public sealed class CompetitorTargetConfiguration : IEntityTypeConfiguration<Com
 
         builder.Property(target => target.CreatedAt)
                .HasColumnName("created_at");
+
+        // Operational stamp advanced by the scrape pipeline (Story 3.3, lifecycle
+        // step 9): null until the first completed scrape.
+        builder.Property(target => target.LastScrapedAt)
+               .HasColumnName("last_scraped_at");
     }
 }

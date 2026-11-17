@@ -12,7 +12,8 @@ namespace GapMiner.Infrastructure.Tests.Persistence.Repositories;
 /// Story 2.3 acceptance for <see cref="ICompetitorTargetRepository"/>: one
 /// Testcontainers-verified test per interface method
 /// (<c>AddAsync</c>, <c>GetByIdAsync</c>, <c>GetAllAsync</c>,
-/// <c>ExistsByUrlAsync</c>) plus cancellation propagation. Runs against its own
+/// <c>ExistsByUrlAsync</c>, <c>MarkScrapedAsync</c> from Story 3.3) plus
+/// cancellation propagation. Runs against its own
 /// migrated database on the shared pgvector/pgvector:pg16 container.
 /// </summary>
 [Collection(PostgresCollection.Name)]
@@ -114,6 +115,55 @@ public sealed class CompetitorTargetRepositoryTests(PostgresFixture fixture)
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
             () => repository.GetAllAsync(canceled.Token));
+    }
+
+    [Fact]
+    public async Task MarkScrapedAsync_stamps_last_scraped_at_without_touching_other_columns()
+    {
+        var target = NewTarget("Stamped App", "https://apps.shopify.com/stamped-app", createdAt: BaseTime);
+        await using (var context = await NewContextAsync())
+        {
+            await new CompetitorTargetRepository(context).AddAsync(target);
+        }
+
+        var scrapedAt = new DateTimeOffset(2026, 11, 17, 12, 0, 0, TimeSpan.Zero);
+        await using (var context = await NewContextAsync())
+        {
+            await new CompetitorTargetRepository(context).MarkScrapedAsync(target.Id, scrapedAt);
+        }
+
+        await using (var context = await NewContextAsync())
+        {
+            var fetched = await new CompetitorTargetRepository(context).GetByIdAsync(target.Id);
+
+            Assert.NotNull(fetched);
+            Assert.Equal(scrapedAt, fetched.LastScrapedAt);
+            // The set-based update stamped exactly one column.
+            Assert.Equal("Stamped App", fetched.Name);
+            Assert.Equal(BaseTime, fetched.CreatedAt);
+        }
+    }
+
+    [Fact]
+    public async Task MarkScrapedAsync_on_an_unknown_id_is_not_an_error()
+    {
+        await using var context = await NewContextAsync();
+
+        // The scrape job already failed loudly on the missing target; a
+        // no-row update here is a no-op, not a failure.
+        await new CompetitorTargetRepository(context).MarkScrapedAsync(Guid.NewGuid(), DateTimeOffset.UtcNow);
+    }
+
+    [Fact]
+    public async Task MarkScrapedAsync_honors_a_canceled_token()
+    {
+        await using var context = await NewContextAsync();
+        var repository = new CompetitorTargetRepository(context);
+
+        using var canceled = new CancellationTokenSource(TimeSpan.Zero);
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => repository.MarkScrapedAsync(Guid.NewGuid(), DateTimeOffset.UtcNow, canceled.Token));
     }
 
     [Fact]

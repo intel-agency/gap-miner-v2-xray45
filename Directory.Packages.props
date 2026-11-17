@@ -38,8 +38,15 @@
     <!-- Queue / Cache: Redis 7.x (StackExchange.Redis client) -->
     <PackageVersion Include="StackExchange.Redis" Version="2.13.23" />
 
-    <!-- Job Scheduling: Hangfire 1.8.x -->
+    <!-- Job Scheduling: Hangfire 1.8.x. Hangfire.AspNetCore carries the DI/server/
+         dashboard integration at the plan's 1.8.14 pin. Hangfire.Redis.StackExchange
+         is pinned 1.11.0 — the newest release whose Hangfire.Core minimum (1.8.12)
+         stays within the plan's 1.8.14 pin (1.12.0 demands >= 1.8.18); its
+         StackExchange.Redis minimum (2.7.33) is satisfied by the 2.13.23 pin above,
+         so both storages share one multiplexer. -->
     <PackageVersion Include="Hangfire.Core" Version="1.8.14" />
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.14" />
+    <PackageVersion Include="Hangfire.Redis.StackExchange" Version="1.11.0" />
 
     <!-- AI Orchestration: Semantic Kernel 1.20.x -->
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.20.0" />

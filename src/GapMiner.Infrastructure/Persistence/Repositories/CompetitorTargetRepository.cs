@@ -36,4 +36,12 @@ public sealed class CompetitorTargetRepository(GapMinerDbContext context) : ICom
         => context.CompetitorTargets
             .AsNoTracking()
             .AnyAsync(target => target.MarketplaceUrl == marketplaceUrl, cancellationToken);
+
+    /// <inheritdoc />
+    public Task MarkScrapedAsync(Guid id, DateTimeOffset scrapedAt, CancellationToken cancellationToken = default)
+        => context.CompetitorTargets
+            .Where(target => target.Id == id)
+            .ExecuteUpdateAsync(
+                update => update.SetProperty(target => target.LastScrapedAt, scrapedAt),
+                cancellationToken);
 }
