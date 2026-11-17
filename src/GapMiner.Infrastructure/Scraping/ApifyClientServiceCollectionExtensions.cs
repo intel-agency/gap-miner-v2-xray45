@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -30,6 +31,19 @@ public static class ApifyClientServiceCollectionExtensions
     /// roughly <c>2^n</c> times this, plus jitter).
     /// </summary>
     public static readonly TimeSpan RetryBaseDelay = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// Overall <see cref="HttpClient.Timeout"/> for the client. The
+    /// run-sync-get-dataset-items endpoint holds the connection for the
+    /// whole actor run — documented maximum wait 300 s — which the
+    /// framework's 100 s default would abort client-side with a
+    /// <c>TaskCanceledException</c> (Apify docs: "Make sure your HTTP client
+    /// is configured to have a long enough connection timeout"). Consumers
+    /// can override it by registering a later
+    /// <c>ConfigureHttpClient</c> callback on the client builder.
+    /// https://docs.apify.com/api/v2/actor-run-sync-get-dataset-items
+    /// </summary>
+    public static readonly TimeSpan ClientTimeout = TimeSpan.FromSeconds(310);
 
     /// <summary>
     /// Registers <see cref="IApifyClient"/> as a typed Refit client against
@@ -71,6 +85,21 @@ public static class ApifyClientServiceCollectionExtensions
             BackoffType = DelayBackoffType.Exponential,
             Delay = RetryBaseDelay,
             UseJitter = true,
+
+            // Retry strictly 429/5xx per the acceptance criteria. The
+            // framework's default predicate (HttpClientResiliencePredicates.
+            // IsTransient) would also retry 408, but Apify documents 408 on
+            // run-sync-get-dataset-items as "the run exceeded the 300 s
+            // limit" with the run NOT aborted — a retry there re-POSTs and
+            // starts a duplicate (paid) actor run.
+            // https://docs.apify.com/api/v2/actor-run-sync-get-dataset-items
+            ShouldHandle = static args =>
+            {
+                var status = args.Outcome.Result?.StatusCode;
+                return ValueTask.FromResult(status is not null
+                    && (status == HttpStatusCode.TooManyRequests
+                        || status >= HttpStatusCode.InternalServerError));
+            },
         };
         configureRetry?.Invoke(retryOptions);
 
@@ -84,7 +113,15 @@ public static class ApifyClientServiceCollectionExtensions
             {
                 UrlParameterFormatter = new ApifyUrlParameterFormatter(),
             })
-            .ConfigureHttpClient(client => client.BaseAddress = new Uri(BaseAddress))
+            .ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new Uri(BaseAddress);
+
+                // Long enough for a full documented 300 s sync run (see
+                // ClientTimeout); retries and failures are governed by the
+                // resilience pipeline below, not by this timeout.
+                client.Timeout = ClientTimeout;
+            })
             .AddHttpMessageHandler<ApifyAuthenticationHandler>();
 
         clientBuilder.AddResilienceHandler(RetryPipelineName, pipeline => pipeline.AddRetry(retryOptions));

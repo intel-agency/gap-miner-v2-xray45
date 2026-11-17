@@ -14,10 +14,11 @@ namespace GapMiner.Infrastructure.Tests.Scraping;
 /// <see cref="HttpMessageHandler"/> behind the real DI registration
 /// (<c>AddApifyClient</c>) validates each endpoint's request shape — method,
 /// path template, query parameters, bearer header and JSON body — plus the
-/// typed response DTOs, the Polly retry behavior (429/5xx retried, exactly 3
-/// retries, exponential backoff shrunk for test speed) and the fail-fast
-/// missing-token guard. Wire formats follow the Apify API v2 reference the
-/// implementation was verified against.
+/// typed response DTOs, the Polly retry behavior (429/5xx retried, 408 not
+/// retried, exactly 3 retries, exponential backoff shrunk for test speed),
+/// the sync-run-aware client timeout and the fail-fast missing-token guard.
+/// Wire formats follow the Apify API v2 reference the implementation was
+/// verified against.
 /// </summary>
 public sealed class ApifyClientTests
 {
@@ -222,6 +223,25 @@ public sealed class ApifyClientTests
     }
 
     [Fact]
+    public async Task Retry_policy_does_not_retry_a_408_sync_run_timeout()
+    {
+        // Apify documents 408 on run-sync-get-dataset-items as "the run
+        // exceeded the 300 s limit" with the run NOT aborted — retrying
+        // would start a duplicate (paid) actor run, so 408 must surface.
+        // https://docs.apify.com/api/v2/actor-run-sync-get-dataset-items
+        var handler = new RecordingHttpMessageHandler(
+            () => Json(HttpStatusCode.RequestTimeout, "{}"),
+            () => Json(HttpStatusCode.Created, ItemsJson));
+        var (client, recorder) = CreateClient(handler);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            () => client.RunSyncGetDatasetItemsAsync("apify~web-scraper", new { startUrl = "https://example.com" }));
+
+        Assert.Equal(HttpStatusCode.RequestTimeout, exception.StatusCode);
+        Assert.Single(recorder.Requests);
+    }
+
+    [Fact]
     public async Task Retry_policy_gives_up_after_exactly_three_retries()
     {
         var handler = new RecordingHttpMessageHandler(() => Json((HttpStatusCode)429, "{}"));
@@ -232,6 +252,29 @@ public sealed class ApifyClientTests
 
         Assert.Equal(HttpStatusCode.TooManyRequests, exception.StatusCode);
         Assert.Equal(4, recorder.Requests.Count);
+    }
+
+    [Fact]
+    public void Client_timeout_covers_the_documented_300_second_sync_run_wait()
+    {
+        // The run-sync endpoint holds the connection for the whole run
+        // (documented max wait 300 s); the framework's 100 s default would
+        // abort it client-side, so AddApifyClient must raise it.
+        var handler = new RecordingHttpMessageHandler(() => Json(HttpStatusCode.OK, "[]"));
+        TimeSpan? observedTimeout = null;
+
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(
+            new Dictionary<string, string?> { [ApifyAuthenticationHandler.TokenConfigurationKey] = Token }).Build();
+        var services = new ServiceCollection();
+        services.AddApifyClient(
+            configuration,
+            configureClient: builder => builder.ConfigureHttpClient(client => observedTimeout = client.Timeout),
+            configureRetry: options => options.Delay = TimeSpan.FromMilliseconds(1));
+
+        _ = services.BuildServiceProvider().GetRequiredService<IApifyClient>();
+
+        Assert.Equal(ApifyClientServiceCollectionExtensions.ClientTimeout, observedTimeout);
+        Assert.True(ApifyClientServiceCollectionExtensions.ClientTimeout > TimeSpan.FromSeconds(300));
     }
 
     [Fact]
