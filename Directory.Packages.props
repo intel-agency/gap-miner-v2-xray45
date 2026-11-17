@@ -58,6 +58,12 @@
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.16.0" />
+    <!-- Test-project composition for the T-2.1 Apify client suite:
+         Microsoft.Extensions.Configuration 8.0.x (latest stable 8.0.0) supplies
+         ConfigurationBuilder + AddInMemoryCollection so the tests register
+         AddApifyClient against an in-memory IConfiguration. ServiceCollection
+         itself already flows transitively from the Infrastructure reference. -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 
     <!-- Code Quality: SonarAnalyzer.CSharp + StyleCop.Analyzers (latest stable) -->
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.36.0.15337" />
