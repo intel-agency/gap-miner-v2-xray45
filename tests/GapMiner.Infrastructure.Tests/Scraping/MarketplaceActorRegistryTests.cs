@@ -69,6 +69,29 @@ public sealed class MarketplaceActorRegistryTests
         Assert.Equal(dateFieldName, entry.DateFieldName);
     }
 
+    public static TheoryData<MarketplaceKind, string[]> DocumentedRequiredInputKeys => new()
+    {
+        // The canonical input form per actor, exactly as documented on each
+        // actor's live store-page input schema (2026-11-17). Alternatives the
+        // actors also accept (CWS extensionIds, Apple startUrls) are documented
+        // in the registry entries' remarks.
+        { MarketplaceKind.ShopifyAppStore, new[] { "appReviewUrl" } },
+        { MarketplaceKind.ChromeWebStore, new[] { "startUrls" } },
+        { MarketplaceKind.AppleAppStore, new[] { "appIds", "country" } },
+        { MarketplaceKind.G2, new[] { "mode", "productUrls" } },
+    };
+
+    [Theory]
+    [MemberData(nameof(DocumentedRequiredInputKeys))]
+    public void Resolve_carries_the_documented_required_input_keys(
+        MarketplaceKind kind,
+        string[] requiredInputKeys)
+    {
+        var entry = MarketplaceActorRegistry.Default.Resolve(kind);
+
+        Assert.Equal(requiredInputKeys, entry.RequiredInputKeys);
+    }
+
     [Fact]
     public void ActorIds_use_the_API_username_actor_form()
     {
@@ -93,6 +116,7 @@ public sealed class MarketplaceActorRegistryTests
             "starRating",
             "reviewerName",
             "publishedAt",
+            new[] { "mode", "productUrls" },
             MarketplaceActorEntryStatus.NeedsVerification);
         var registry = new MarketplaceActorRegistry(
             new Dictionary<MarketplaceKind, MarketplaceActorEntry> { [MarketplaceKind.G2] = entry });
@@ -120,6 +144,7 @@ public sealed class MarketplaceActorRegistryTests
                     "score",
                     "userName",
                     "date",
+                    new[] { "appIds", "country" },
                     MarketplaceActorEntryStatus.Verified),
             });
 
@@ -142,6 +167,7 @@ public sealed class MarketplaceActorRegistryTests
             "rating",
             "reviewer",
             "date",
+            new[] { "appReviewUrl" },
             MarketplaceActorEntryStatus.NeedsVerification);
         var registry = new MarketplaceActorRegistry(
             new Dictionary<MarketplaceKind, MarketplaceActorEntry> { [MarketplaceKind.ShopifyAppStore] = entry });
@@ -198,6 +224,7 @@ public sealed class MarketplaceActorRegistryTests
             blankField == "StarRatingFieldName" ? "" : "score",
             blankField == "AuthorFieldName" ? " " : "userName",
             blankField == "DateFieldName" ? "" : "date",
+            new[] { "appIds", "country" },
             MarketplaceActorEntryStatus.Verified);
 
         var ex = Assert.Throws<ArgumentException>(
@@ -205,6 +232,69 @@ public sealed class MarketplaceActorRegistryTests
                 new Dictionary<MarketplaceKind, MarketplaceActorEntry> { [MarketplaceKind.AppleAppStore] = entry }));
 
         Assert.Contains(blankField, ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_rejects_null_required_input_keys()
+    {
+        var entry = new MarketplaceActorEntry(
+            MarketplaceKind.AppleAppStore,
+            "thewolves~appstore-reviews-scraper",
+            "id",
+            "text",
+            "score",
+            "userName",
+            "date",
+            null!,
+            MarketplaceActorEntryStatus.Verified);
+
+        var ex = Assert.Throws<ArgumentException>(
+            () => new MarketplaceActorRegistry(
+                new Dictionary<MarketplaceKind, MarketplaceActorEntry> { [MarketplaceKind.AppleAppStore] = entry }));
+
+        Assert.Contains("required input keys", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_rejects_empty_required_input_keys()
+    {
+        var entry = new MarketplaceActorEntry(
+            MarketplaceKind.AppleAppStore,
+            "thewolves~appstore-reviews-scraper",
+            "id",
+            "text",
+            "score",
+            "userName",
+            "date",
+            Array.Empty<string>(),
+            MarketplaceActorEntryStatus.Verified);
+
+        var ex = Assert.Throws<ArgumentException>(
+            () => new MarketplaceActorRegistry(
+                new Dictionary<MarketplaceKind, MarketplaceActorEntry> { [MarketplaceKind.AppleAppStore] = entry }));
+
+        Assert.Contains("required input keys", ex.Message);
+    }
+
+    [Fact]
+    public void Constructor_rejects_blank_required_input_key()
+    {
+        var entry = new MarketplaceActorEntry(
+            MarketplaceKind.AppleAppStore,
+            "thewolves~appstore-reviews-scraper",
+            "id",
+            "text",
+            "score",
+            "userName",
+            "date",
+            new[] { "appIds", " " },
+            MarketplaceActorEntryStatus.Verified);
+
+        var ex = Assert.Throws<ArgumentException>(
+            () => new MarketplaceActorRegistry(
+                new Dictionary<MarketplaceKind, MarketplaceActorEntry> { [MarketplaceKind.AppleAppStore] = entry }));
+
+        Assert.Contains("blank required input key", ex.Message);
     }
 
     [Fact]
@@ -218,6 +308,7 @@ public sealed class MarketplaceActorRegistryTests
             "score",
             "userName",
             "date",
+            new[] { "appIds", "country" },
             MarketplaceActorEntryStatus.Verified);
 
         Assert.Throws<ArgumentException>(
@@ -236,6 +327,7 @@ public sealed class MarketplaceActorRegistryTests
             "starRating",
             "reviewerName",
             "publishedAt",
+            new[] { "mode", "productUrls" },
             (MarketplaceActorEntryStatus)99);
 
         Assert.Throws<ArgumentException>(

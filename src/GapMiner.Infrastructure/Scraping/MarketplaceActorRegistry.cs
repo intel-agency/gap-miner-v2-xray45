@@ -21,9 +21,11 @@ namespace GapMiner.Infrastructure.Scraping;
 /// verified equivalent the plan's AC-1 sanctions for Shopify ("or verified
 /// equivalent actor ID") and CWS ("adapt for CWS if an actor exists" — a
 /// dedicated Chrome Web Store reviews actor exists, so the Google Play
-/// fallback is unnecessary). Each entry's remarks carry the actor's required
-/// input keys for Story 3.3's job, and its <c>VerificationNote</c> cites the
-/// store page the field names were read from.
+/// fallback is unnecessary). Each entry's
+/// <see cref="MarketplaceActorEntry.RequiredInputKeys"/> carries the actor's
+/// required input keys for Story 3.3's job (canonical form; the per-entry
+/// remarks document accepted alternatives), and its <c>VerificationNote</c>
+/// cites the store page the field names were read from.
 /// </para>
 /// <para>
 /// Verification is point-in-time: actors are community-maintured and their
@@ -47,6 +49,7 @@ public sealed class MarketplaceActorRegistry
         StarRatingFieldName: "rating",
         AuthorFieldName: "reviewer",
         DateFieldName: "date",
+        RequiredInputKeys: new[] { "appReviewUrl" },
         MarketplaceActorEntryStatus.Verified,
         VerificationNote: "Live Apify Store verified 2026-11-17: apify.com/powerai/shopify-app-reviews-scraper — actor resolves (2.7k runs, 121 users); README documents the output fields incl. an example dataset item. Note: this actor emits 'date' in a human-readable format (e.g. \"October 21, 2025\"), not ISO 8601 — parsing belongs to Story 3.3's mapping.");
 
@@ -65,6 +68,7 @@ public sealed class MarketplaceActorRegistry
         StarRatingFieldName: "rating",
         AuthorFieldName: "reviewerName",
         DateFieldName: "reviewDate",
+        RequiredInputKeys: new[] { "startUrls" },
         MarketplaceActorEntryStatus.Verified,
         VerificationNote: "Live Apify Store verified 2026-11-17: apify.com/automation-lab/chrome-web-store-reviews-scraper — actor resolves (101 users, 98.5% success); README carries a field table and example output item (reviewDate ISO 8601); changelog active 2026-11-17.");
 
@@ -82,6 +86,7 @@ public sealed class MarketplaceActorRegistry
         StarRatingFieldName: "score",
         AuthorFieldName: "userName",
         DateFieldName: "date",
+        RequiredInputKeys: new[] { "appIds", "country" },
         MarketplaceActorEntryStatus.Verified,
         VerificationNote: "Live Apify Store verified 2026-11-17: apify.com/thewolves/appstore-reviews-scraper — actor resolves (3.4k users, 4.98 stars, 246k runs); README documents a 12-field output reference incl. an example item (date ISO 8601, score 1-5).");
 
@@ -101,6 +106,7 @@ public sealed class MarketplaceActorRegistry
         StarRatingFieldName: "starRating",
         AuthorFieldName: "reviewerName",
         DateFieldName: "publishedAt",
+        RequiredInputKeys: new[] { "mode", "productUrls" },
         MarketplaceActorEntryStatus.Verified,
         VerificationNote: "Live Apify Store verified 2026-11-17: apify.com/automation-lab/g2-scraper — actor resolves (1.3k users, 5.0 stars, 100% 30-day success); README documents a 42-field review table incl. an example item (starRating 1-5 derived from NPS, publishedAt ISO 8601).");
 
@@ -129,8 +135,9 @@ public sealed class MarketplaceActorRegistry
     /// </exception>
     /// <exception cref="ArgumentException">
     /// <paramref name="entries"/> is empty, an entry is keyed by a marketplace
-    /// other than its own, an entry has a blank actor ID or field name, or an
-    /// entry has an undefined status.
+    /// other than its own, an entry has a blank actor ID or field name, an
+    /// entry has null, empty, or blank required input keys, or an entry has
+    /// an undefined status.
     /// </exception>
     public MarketplaceActorRegistry(IReadOnlyDictionary<MarketplaceKind, MarketplaceActorEntry> entries)
     {
@@ -152,6 +159,19 @@ public sealed class MarketplaceActorRegistry
             if (string.IsNullOrWhiteSpace(entry.ActorId))
             {
                 throw new ArgumentException($"Entry for {kind} has a blank ActorId.", nameof(entries));
+            }
+
+            if (entry.RequiredInputKeys is null || entry.RequiredInputKeys.Count == 0)
+            {
+                throw new ArgumentException($"Entry for {kind} has no required input keys.", nameof(entries));
+            }
+
+            foreach (var inputKey in entry.RequiredInputKeys)
+            {
+                if (string.IsNullOrWhiteSpace(inputKey))
+                {
+                    throw new ArgumentException($"Entry for {kind} has a blank required input key.", nameof(entries));
+                }
             }
 
             foreach (var (fieldName, value) in new[]
@@ -218,6 +238,12 @@ public sealed class MarketplaceActorRegistry
     /// (including <see cref="MarketplaceActorEntryStatus.NeedsVerification"/>
     /// ones) rather than scraping.
     /// </summary>
+    /// <remarks>
+    /// The scrape path must use <see cref="Resolve"/>: this lookup
+    /// deliberately skips the <c>NeedsVerification</c> guard, so a caller
+    /// that scrapes through <see cref="TryGet"/> would bypass the
+    /// fail-fast contract (review NIT, PR #52).
+    /// </remarks>
     /// <param name="marketplaceKind">The marketplace to look up.</param>
     /// <param name="entry">
     /// The entry, whatever its status; <see langword="null"/> when the

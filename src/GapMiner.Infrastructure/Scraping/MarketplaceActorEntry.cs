@@ -33,6 +33,13 @@ namespace GapMiner.Infrastructure.Scraping;
 /// <param name="DateFieldName">
 /// The dataset item field holding the review's publication date.
 /// </param>
+/// <param name="RequiredInputKeys">
+/// The actor input keys a run for this marketplace must set — the pipeline's
+/// canonical input form, read from the actor's live store-page input schema.
+/// Where an actor accepts alternative forms (e.g. Chrome Web Store URLs or
+/// raw extension IDs), the registry entry's remarks document them; Story
+/// 3.3's job builds its run input from these keys.
+/// </param>
 /// <param name="Status">
 /// Whether the entry was verified against the live Apify Store. A
 /// <see cref="MarketplaceActorEntryStatus.NeedsVerification"/> entry throws
@@ -51,5 +58,6 @@ public sealed record MarketplaceActorEntry(
     string StarRatingFieldName,
     string AuthorFieldName,
     string DateFieldName,
+    IReadOnlyList<string> RequiredInputKeys,
     MarketplaceActorEntryStatus Status,
     string? VerificationNote = null);
