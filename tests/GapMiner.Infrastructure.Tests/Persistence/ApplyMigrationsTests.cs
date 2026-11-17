@@ -25,8 +25,14 @@ public sealed class ApplyMigrationsTests(PostgresFixture fixture)
         using var scope = provider.CreateScope();
         await using var context = scope.ServiceProvider.GetRequiredService<GapMinerDbContext>();
         var applied = await context.Database.GetAppliedMigrationsAsync();
-        var migration = Assert.Single(applied);
-        Assert.EndsWith("InitialSchema", migration, StringComparison.Ordinal);
+        // Every migration defined in the assembly got applied (not a hardcoded
+        // count — later migrations must not break this test), starting with
+        // the initial schema.
+        Assert.Equal(
+            context.Database.GetMigrations().OrderBy(migration => migration, StringComparer.Ordinal),
+            applied.OrderBy(migration => migration, StringComparer.Ordinal));
+        Assert.Contains(applied, migration => migration.EndsWith("InitialSchema", StringComparison.Ordinal));
+        Assert.Contains(applied, migration => migration.EndsWith("AddCompetitorTargetLastScrapedAt", StringComparison.Ordinal));
         Assert.True(await PostgresProbe.ScalarBoolAsync(context, PostgresProbe.TableExists("review")));
     }
 
@@ -44,7 +50,11 @@ public sealed class ApplyMigrationsTests(PostgresFixture fixture)
         using var scope = provider.CreateScope();
         await using var context = scope.ServiceProvider.GetRequiredService<GapMinerDbContext>();
         var applied = await context.Database.GetAppliedMigrationsAsync();
-        Assert.Single(applied);
+        // Idempotent: the second call applied nothing new — still exactly the
+        // assembly's full migration list.
+        Assert.Equal(
+            context.Database.GetMigrations().OrderBy(migration => migration, StringComparer.Ordinal),
+            applied.OrderBy(migration => migration, StringComparer.Ordinal));
     }
 
     [Fact]

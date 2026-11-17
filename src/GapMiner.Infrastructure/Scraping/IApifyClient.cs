@@ -3,9 +3,10 @@ using Refit;
 namespace GapMiner.Infrastructure.Scraping;
 
 /// <summary>
-/// Typed Refit client for the three Apify API v2 endpoints the scraper
-/// pipeline uses (plan T-2.1): synchronous actor triggering, actor-run status
-/// polling, and dataset-item retrieval. Register through
+/// Typed Refit client for the four Apify API v2 endpoints the scraper pipeline
+/// uses (plan T-2.1 + the T-2.3 poll loop): asynchronous actor triggering,
+/// synchronous actor triggering, actor-run status polling, and dataset-item
+/// retrieval. Register through
 /// <see cref="ApifyClientServiceCollectionExtensions.AddApifyClient"/> so the
 /// bearer delegating handler and the Polly retry policy are attached — the
 /// endpoints are not authenticated or resilient when implemented by hand.
@@ -21,6 +22,41 @@ namespace GapMiner.Infrastructure.Scraping;
 /// </remarks>
 public interface IApifyClient
 {
+    /// <summary>
+    /// Triggers an actor run and returns immediately, without waiting for it to
+    /// finish (<c>POST /v2/acts/{actorId}/runs</c>) — the run-start endpoint of
+    /// the scrape pipeline's poll loop, whose 60-minute budget exceeds what the
+    /// synchronous endpoints can hold (they cap at 300 seconds and answer 408).
+    /// The request body is the actor input JSON; the response (HTTP 201) is the
+    /// <c>{ "data": { run } }</c> envelope with the run's ID and status, from
+    /// which <see cref="GetActorRunAsync"/> polls until a terminal status and
+    /// <see cref="ApifyActorRun.DefaultDatasetId"/> feeds the dataset download.
+    /// </summary>
+    /// <param name="actorId">
+    /// Actor ID or <c>username~actor-name</c> (e.g. <c>apify~web-scraper</c>).
+    /// Resolved from the Story 3.2 marketplace registry.
+    /// </param>
+    /// <param name="actorInput">
+    /// The actor input object, serialized as camelCase JSON per the actor's
+    /// input schema (target URL, review filter, and so on).
+    /// </param>
+    /// <param name="timeout">Optional run timeout in seconds.</param>
+    /// <param name="memory">Optional memory limit for the run, in megabytes.</param>
+    /// <param name="maxItems">Optional cap on charged dataset items.</param>
+    /// <param name="build">Optional actor build tag or number to run.</param>
+    /// <param name="cancellationToken">Propagates cancellation (R4).</param>
+    /// <returns>The enveloped run — <see cref="ApifyActorRun.Id"/> polls,
+    /// <see cref="ApifyActorRun.Status"/> starts as READY or RUNNING.</returns>
+    [Post("/v2/acts/{actorId}/runs")]
+    Task<ApifyRunResponse> RunActorAsync(
+        string actorId,
+        [Body] object actorInput,
+        int? timeout = null,
+        int? memory = null,
+        int? maxItems = null,
+        string? build = null,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Triggers an actor run, waits for it synchronously, and returns the
     /// run's dataset items (<c>POST /v2/acts/{actorId}/run-sync-get-dataset-items</c>).

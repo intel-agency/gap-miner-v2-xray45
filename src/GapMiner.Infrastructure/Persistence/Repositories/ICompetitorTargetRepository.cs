@@ -43,4 +43,20 @@ public interface ICompetitorTargetRepository
     /// <param name="cancellationToken">Propagates notification that the operation should be canceled.</param>
     /// <returns><see langword="true"/> when a target with that URL exists.</returns>
     Task<bool> ExistsByUrlAsync(Uri marketplaceUrl, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Stamps a target's <see cref="CompetitorTarget.LastScrapedAt"/> with the
+    /// given UTC moment — the scrape pipeline's lifecycle step 9 (Story 3.3).
+    /// A set-based update: the entity is immutable after creation, so the stamp is
+    /// written without materializing or re-saving the aggregate.
+    /// </summary>
+    /// <param name="id">The aggregate identifier.</param>
+    /// <param name="scrapedAt">The UTC moment the scrape completed.</param>
+    /// <param name="cancellationToken">Propagates notification that the operation should be canceled.</param>
+    /// <returns>
+    /// A task representing the update; completes also when no row matches (the
+    /// scrape job already failed earlier on a missing target, so a missing row
+    /// here is not an error).
+    /// </returns>
+    Task MarkScrapedAsync(Guid id, DateTimeOffset scrapedAt, CancellationToken cancellationToken = default);
 }

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Story 3.3 (T-2.3): unit tests for the scrape job's mapping and lifecycle
+       (NSubstitute doubles behind the real interfaces) plus the queue round-trip
+       integration test (Testcontainers Redis — the same redis:7.4 image the
+       AppHost pins; Apify calls mocked). -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <!-- Coverage scope = the assembly under test. Referenced assemblies are measured
+         at 0% because this suite exercises the worker, not their logic; their floors
+         are enforced by their own suites (GapMiner.Infrastructure.Tests,
+         GapMiner.Domain.Tests). The composition root (Program.cs) is excluded for the
+         same reason EF design-time artifacts are in the Infrastructure suite: it holds
+         no unit-testable logic, only DI wiring exercised by the AppHost integration
+         runs. -->
+    <Exclude>$(Exclude)[GapMiner.Infrastructure]*,[GapMiner.Domain]*,[GapMiner.ServiceDefaults]*</Exclude>
+    <ExcludeByFile>$(ExcludeByFile)**/Program.cs</ExcludeByFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.msbuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Testcontainers.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\GapMiner.ScraperWorker\GapMiner.ScraperWorker.csproj" />
+  </ItemGroup>
+
+</Project>

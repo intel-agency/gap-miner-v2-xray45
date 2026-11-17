@@ -25,5 +25,22 @@ public class CompetitorTargetTests
         Assert.Equal(MarketplaceKind.ShopifyAppStore, target.MarketplaceKind);
         Assert.Same(url, target.MarketplaceUrl);
         Assert.Equal(createdAt, target.CreatedAt);
+        Assert.Null(target.LastScrapedAt);
+    }
+
+    [Fact]
+    public void Constructor_assigns_last_scraped_at_when_given()
+    {
+        var lastScrapedAt = new DateTimeOffset(2026, 11, 17, 12, 0, 0, TimeSpan.Zero);
+
+        var target = new CompetitorTarget(
+            id: Guid.NewGuid(),
+            name: "Competitor App",
+            marketplaceKind: MarketplaceKind.ShopifyAppStore,
+            marketplaceUrl: new Uri("https://apps.shopify.com/competitor-app"),
+            createdAt: new DateTimeOffset(2026, 11, 12, 9, 0, 0, TimeSpan.Zero),
+            lastScrapedAt: lastScrapedAt);
+
+        Assert.Equal(lastScrapedAt, target.LastScrapedAt);
     }
 }
