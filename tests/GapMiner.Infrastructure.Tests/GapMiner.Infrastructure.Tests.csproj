@@ -15,6 +15,11 @@
          snapshot + *.Designer.cs) contain no runtime code paths either. -->
     <Exclude>$(Exclude)[GapMiner.Domain]*</Exclude>
     <ExcludeByFile>$(ExcludeByFile)**/Persistence/Migrations/*ModelSnapshot.cs,**/Persistence/Migrations/*.Designer.cs</ExcludeByFile>
+    <!-- Story 4.1: same SKEXP rationale as GapMiner.Infrastructure — the plan's
+         SK 1.20.0 pin governs version drift, so the experimental-marked embedding
+         service surface is used and the diagnostics suppressed (NoWarn does not
+         flow from referenced projects). -->
+    <NoWarn>$(NoWarn);SKEXP0001;SKEXP0010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

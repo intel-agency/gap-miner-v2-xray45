@@ -50,6 +50,12 @@
 
     <!-- AI Orchestration: Semantic Kernel 1.20.x -->
     <PackageVersion Include="Microsoft.SemanticKernel" Version="1.20.0" />
+    <!-- Community Anthropic client for the Claude chat branch (Story 4.1).
+         5.10.0 = latest stable, live-verified against api.z.ai's
+         Anthropic-compatible endpoint; carries no SK dependency (it exposes
+         Microsoft.Extensions.AI IChatClient integration only) — the SK
+         IChatCompletionService adapter lives in GapMiner.Infrastructure/AI. -->
+    <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
 
     <!-- HTTP Client: Refit 7.x -->
     <PackageVersion Include="Refit.HttpClientFactory" Version="7.2.1" />
