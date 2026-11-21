@@ -35,6 +35,16 @@ When asked to commit the current set of changes in the working copy, always:
 - For each comment that is addressed, leave a comment explaining the resolution and mark the thread as RESOLVED state.
 - ADDRESS ALL COMMENTS BEFORE MERGING.
 
+## Branch protection & merge method (live ruleset — verified 2026-11-21)
+
+The `development` branch is governed by an active repository ruleset ("protected branches", id 27750112, created 2026-11-20):
+
+- **Direct pushes to `development` are rejected** — every change, including `.agents/` bookkeeping commits, must go through a pull request (memory bookkeeping rides a small `chore/bookkeeping-*` PR; the earlier direct-push convention is dead).
+- **Merge commits only**: `allowed_merge_methods: ["merge"]` — `gh pr merge --squash` fails with "Squash merges are not allowed on this repository" even though repo settings say squash is enabled. Always merge with `gh pr merge --merge`.
+- Required status check: `validate` (strict policy — must run on the merge head).
+- `required_approving_review_count: 0` + `required_review_thread_resolution: true` — no approval count blocks the merge, but every review thread must be resolved.
+- Branch deletion and non-fast-forward pushes are blocked.
+
 ## Resolving review comments
 
 When resolving PR review comments (automatically or manually), follow this sequence for **every** unresolved thread:
