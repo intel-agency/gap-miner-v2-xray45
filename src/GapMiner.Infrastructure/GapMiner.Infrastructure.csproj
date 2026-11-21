@@ -7,6 +7,13 @@
        repo-local dotnet-ef tool (.config/dotnet-tools.json) to generate migrations. -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <!-- Story 4.1 (T-3.1): SK 1.20.0 (the plan §3 pin) marks the embedding
+         DI extensions (SKEXP0010) and ITextEmbeddingGenerationService
+         (SKEXP0001) as "experimental / subject to change". Version drift is
+         governed by the plan's exact pin, not by avoiding the API, so both
+         diagnostics are suppressed with this rationale rather than bumping
+         SK or hand-rolling the registration path. -->
+    <NoWarn>$(NoWarn);SKEXP0001;SKEXP0010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +44,18 @@
          set, so no new transitive stack is introduced. -->
     <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Story 4.1 (T-3.1): Semantic Kernel bootstrap. Microsoft.SemanticKernel
+         1.20.0 is the plan §3 pin (meta package = Core + the AzureOpenAI
+         connector, whose OpenAI connector flows in transitively for the
+         Anthropic branch's OpenAI embeddings). Anthropic.SDK 5.10.0 is the
+         community Anthropic client the Claude chat branch adapts (see
+         SemanticKernelBuilderExtensions remarks): verified live 2026-11-21
+         that no SK-1.20-compatible package connector exists. -->
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Anthropic.SDK" />
   </ItemGroup>
 
   <ItemGroup>
